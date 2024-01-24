@@ -1,0 +1,132 @@
+import matplotlib.pyplot as plt
+import torch
+import wandb
+
+
+def plot(img, cmap="gray"):
+    x, y = img.shape
+    plt.axvline(x=x // 2)
+    plt.imshow(img, cmap=cmap)
+    plt.show()
+
+
+def vis_to_wandb_segmentation(img, output, mask, names, loss, epoch, save=False, save_path=None):
+    with torch.no_grad():
+        # Get the predicted masks from the output logits
+        _, predicted_masks = torch.max(output, dim=1)
+        _, mask = torch.max(mask, dim=1)
+
+        # Convert the inputs, labels, and predicted masks to numpy arrays
+        inputs = img.cpu().detach().numpy()
+        labels = mask.cpu().detach().numpy()
+        predicted_masks = predicted_masks.cpu().detach().numpy()
+
+        # From the batch
+        i = 0
+        name = names[i]
+        image = inputs[i, 0]
+        label = labels[i]
+        predicted_mask = predicted_masks[i]
+
+        # Create a figure with 3 subplots
+        fig, axs = plt.subplots(1, 3, figsize=(15, 5))
+
+        cmap = plt.cm.get_cmap('tab10', 4)
+
+        # Plot the input image in the first subplot
+        axs[0].imshow(image, cmap="gray")
+        axs[0].set_title(f'Input image')
+
+        # Plot the label in the second subplot
+        axs[1].imshow(label, cmap=cmap, vmin=0, vmax=3)
+        axs[1].set_title(f'Label')
+
+        # Plot the predicted mask in the third subplot
+        axs[2].imshow(predicted_mask, cmap=cmap, vmin=0, vmax=3)
+        axs[2].set_title(f'Predicted mask')
+
+        fig.suptitle(f"{name}  loss: {loss}")
+
+        if save:
+            assert save_path is not None
+            plt.savefig(f'{save_path}/{epoch}.png', dpi=200)
+
+        wandb.log({"plot": fig})
+        plt.close(fig)
+
+
+def plot_from3d(img, slice=200, line=True, mask=None):
+    s = None
+    if len(img.shape) == 5:
+        s = img[0, 0, :, :, slice].cpu().detach()
+    elif len(img.shape) == 4:
+        s = img[0, :, :, slice].cpu().detach()
+
+    elif len(img.shape) == 3:
+        s = img[:, :, slice].cpu().detach()
+
+    m = None
+    if mask is not None:
+        if len(mask.shape) == 5:
+            m = mask[0, 0, :, :, slice].cpu().detach()
+        elif len(mask.shape) == 4:
+            m = mask[0, :, :, slice].cpu().detach()
+
+        elif len(img.shape) == 3:
+            m = mask[:, :, slice].cpu().detach()
+
+    x = s.shape[1]
+    plt.imshow(s, cmap="gray")
+    if mask is not None:
+        plt.imshow(m == 1, alpha=0.4)
+        print(mask.unique())
+    if line:
+        plt.axvline(x=x // 2)
+    plt.show(block=False)
+    plt.close()
+
+
+def detailed_plot_from3d(img, slice=None, line=True, name="unnamed", loss=0.0, save=False, save_location="",
+                         cmap="gray", use_wandb=False):
+    if slice is None:
+        slice_z = int(min(torch.tensor(img.shape[-3:]) / 2))
+        slice_x = int(max(torch.tensor(img.shape[-3:]) / 2))
+        print(slice_x, slice_z, img.shape)
+    else:
+        slice_z = slice
+        slice_x = slice
+
+    fig, axs = plt.subplots(1, 2, figsize=(10, 5))
+
+    if len(img.shape) == 5:
+        img = img[0, 0]
+    elif len(img.shape) == 4:
+        img = img[0]
+
+    try:
+        img = img.cpu().detach()
+    except AttributeError:
+        img = torch.tensor(img)
+
+    slices = [torch.rot90(img[slice_x, :, :]), img[:, :, slice_z]]
+    titles = ['X-axis slice', 'Z-axis slice']
+
+    for i, ax in enumerate(axs.flat):
+        im = ax.imshow(slices[i], cmap=cmap)
+        if line:
+            ax.axvline(x=slices[i].shape[1] // 2)
+
+        ax.set_title(titles[i])
+
+    if name != "unnamed":
+        fig.suptitle(f"Iteration: {name}, Loss: {loss:.3f}")
+    if save:
+        fig.savefig(f"{save_location}/{name}.png", dpi=200)
+
+    plt.colorbar(im, ax=axs.ravel().tolist())
+
+    if use_wandb:
+        wandb.log({name: fig})
+
+    plt.show(block=False)
+    plt.close()
