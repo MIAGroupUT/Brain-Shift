@@ -10,7 +10,7 @@ import os
 
 def train_segmentation(run_name, location, batch_size, num_epochs=5000, use_only_full_images=True, lr=3e-4, device="cuda"):
 
-    out_dir = f"{location}/{run_name}"
+    out_dir = f"{location}/outputs/{run_name}"
     os.mkdir(path=out_dir)
     os.mkdir(path=f"{out_dir}/weights")
     os.mkdir(path=f"{out_dir}/visuals")
