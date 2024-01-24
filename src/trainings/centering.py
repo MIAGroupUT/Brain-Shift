@@ -11,7 +11,7 @@ import os
 
 def optimize_centers(run_name, num_epochs, location, batch_size):
 
-    print(f"Starter optimizing centers with the run name: {run_name}")
+    print(f"Started optimizing centers with the run name: {run_name}")
 
     save_location = f"{location}/outputs/centering/{run_name}"
     os.mkdir(path=save_location)
