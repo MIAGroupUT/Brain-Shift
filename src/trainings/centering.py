@@ -1,6 +1,6 @@
 from torch.utils.data import DataLoader
 import wandb
-from src.data.BidsDataset import CTBidsDataset, Dataset3D
+from src.data_loading.BidsDataset import CTBidsDataset, Dataset3D
 from src.losses.losses import jeffreys_divergence_loss, ssim_loss, pixel_loss
 from src.utils.movement import translate_and_rotate
 from src.utils.general import *
@@ -18,8 +18,8 @@ def optimize_centers(run_name, num_epochs, location, batch_size):
     os.mkdir(path=f"{save_location}/visuals")
     os.mkdir(path=f"{save_location}/rotations")
 
-    print("Loading data")
-    dataset = CTBidsDataset(f"{location}/data/bids", slice_thickness='small', caching=False)
+    print("Loading data_loading")
+    dataset = CTBidsDataset(f"{location}/data_loading/bids", slice_thickness='small', caching=False)
     dataset_3d = Dataset3D(dataset)
 
     dataloader = DataLoader(dataset_3d, batch_size=batch_size, shuffle=True)
