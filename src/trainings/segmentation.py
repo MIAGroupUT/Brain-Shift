@@ -1,6 +1,6 @@
 import torch
 import monai
-from src.data.BidsDataset import CTBidsDataset, SliceDataset
+from src.data.BidsDataset import CTBidsDataset, SliceDataset, Dataset3D
 from monai.data import DataLoader
 import wandb
 from src.utils.brain_visualization import vis_to_wandb_segmentation
@@ -8,7 +8,7 @@ from tqdm import tqdm
 import os
 
 
-def train_segmentation(run_name, location, batch_size, num_epochs=5000, use_only_full_images=True, lr=3e-4, device="cuda"):
+def train_segmentation(run_name, location, batch_size, num_epochs=5000, use_only_full_images=True, lr=3e-4, device="cuda", dims=2):
 
     out_dir = f"{location}/outputs/{run_name}"
     os.mkdir(path=out_dir)
@@ -18,17 +18,32 @@ def train_segmentation(run_name, location, batch_size, num_epochs=5000, use_only
 
     print("Loading data")
     dataset = CTBidsDataset(f"{location}/data/bids", slice_thickness=("small" if use_only_full_images else None))
-    dataset_2d = SliceDataset(dataset)
-    dataloader = DataLoader(dataset_2d, batch_size=batch_size, shuffle=True)
+    dataloader = None
+    model = None
 
-    print("Training")
-    model = monai.networks.nets.SwinUNETR(
-        img_size=(512, 512),
-        spatial_dims=2,
-        in_channels=1,
-        out_channels=4,
-        drop_rate=0.2
-    ).to(device)
+    if dims == 2:
+        dataset_2d = SliceDataset(dataset)
+        dataloader = DataLoader(dataset_2d, batch_size=batch_size, shuffle=True)
+
+        model = monai.networks.nets.SwinUNETR(
+            img_size=(512, 512),
+            spatial_dims=2,
+            in_channels=1,
+            out_channels=4,
+            drop_rate=0.2
+        ).to(device)
+
+    if dims == 3:
+        dataset_3d = Dataset3D(dataset)
+        dataloader = DataLoader(dataset_3d, batch_size=batch_size, shuffle=True)
+
+        model = monai.networks.nets.SwinUNETR(
+            img_size=(256, 256, 30),
+            spatial_dims=3,
+            in_channels=1,
+            out_channels=4,
+            drop_rate=0.2
+        )
 
     optimizer = torch.optim.Adam(model.parameters(), lr=lr)
     scheduler = torch.optim.lr_scheduler.ExponentialLR(optimizer, gamma=0.9993)
@@ -36,6 +51,7 @@ def train_segmentation(run_name, location, batch_size, num_epochs=5000, use_only
 
     for epoch in tqdm(range(num_epochs)):
         model.train()
+        print("Training")
 
         for d in dataloader:
             names = d['name']
