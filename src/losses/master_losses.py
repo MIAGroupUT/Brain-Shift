@@ -1,5 +1,5 @@
 from src.losses.losses import *
-from src.models.voxelmorph_layers import apply_deformation_field
+from src.nets.voxelmorph_layers import apply_deformation_field
 
 
 def master_loss(original_skull,
