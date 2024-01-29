@@ -1,25 +1,31 @@
 from torch.utils.data import DataLoader
 import wandb
-from src.data_loading.BidsDataset import CTBidsDataset, Dataset3D
+from src.data_loading.datasets import AllBidsDataset, Dataset3D
 from src.losses.losses import jeffreys_divergence_loss, ssim_loss, pixel_loss
 from src.utils.movement import translate_and_rotate
 from src.utils.general import *
 from tqdm import tqdm
 from src.utils.brain_visualization import detailed_plot_from3d
 import os
+import shutil
 
 
-def optimize_centers(run_name, num_epochs, location, batch_size):
-
+def optimize_centers(run_name, num_epochs, location, batch_size=1):
     print(f"Started optimizing centers with the run name: {run_name}")
 
     save_location = f"{location}/outputs/centering/{run_name}"
-    os.mkdir(path=save_location)
+
+    try:
+        os.mkdir(path=save_location)
+    except FileExistsError:
+        shutil.rmtree(save_location, ignore_errors=True)
+        os.mkdir(path=save_location)
+
     os.mkdir(path=f"{save_location}/visuals")
     os.mkdir(path=f"{save_location}/rotations")
 
     print("Loading data_loading")
-    dataset = CTBidsDataset(f"{location}/data", slice_thickness='small', caching=False)
+    dataset = AllBidsDataset(f"{location}/data", slice_thickness='small', caching=False)
     dataset_3d = Dataset3D(dataset)
 
     dataloader = DataLoader(dataset_3d, batch_size=batch_size, shuffle=True)

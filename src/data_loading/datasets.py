@@ -1,45 +1,10 @@
 from torch.utils.data import Dataset
-from typing import Literal
 import nibabel as nib
 from glob import glob
 from os import path
 import numpy as np
 import torch
-import monai
-from monai.transforms import *
-
-WINDOW_MIN = -5
-WINDOW_MAX = 85
-
-# TODO: add some correct rotations here
-cached_transform = monai.transforms.Compose([
-    # Apply CT windowing
-    ScaleIntensityRanged(
-        keys=["ct"],
-        a_min=WINDOW_MIN,
-        a_max=WINDOW_MAX,
-        b_min=0,
-        b_max=1,
-        clip=True,
-    ),
-])
-
-random_transform_2d = monai.transforms.Compose([
-    monai.transforms.RandCropByPosNegLabeld(keys=['ct', 'annotation'], spatial_size=(512, 512, 1),
-                                            label_key='annotation', num_samples=1, pos=1),
-    monai.transforms.SqueezeDimd(keys=['ct', 'annotation'], dim=-1, update_meta=True),
-    monai.transforms.RandRotated(keys=['ct', 'annotation'], range_x=3, prob=1, padding_mode="zeros",
-                                 align_corners=True),
-    monai.transforms.RandZoomd(keys=['ct', 'annotation'], min_zoom=0.8, max_zoom=1.2, prob=1, padding_mode="constant")
-])
-
-random_transform_3d = monai.transforms.Compose([
-    monai.transforms.RandRotated(keys=['ct', 'annotation'], range_z=3, prob=1, padding_mode="zeros",
-                                 align_corners=True),
-    monai.transforms.RandCropByPosNegLabeld(keys=['ct', 'annotation'], spatial_size=(256, 256, 32),
-                                            label_key='annotation', num_samples=1, pos=1),
-
-])
+from src.data_loading.transforms import *
 
 
 def add_background_channel(annotations):
@@ -61,10 +26,10 @@ def add_background_channel(annotations):
     return annotations_with_background
 
 
-class CTBidsDataset(Dataset):
+class AnnotatedBidsDataset(Dataset):
     def __init__(self, bids_path: str, slice_thickness: str = None,
                  exclude_registered: object = True,
-                 caching: object = True) -> object:
+                 caching: object = True, transform=cached_transform):
         self.bids_path = bids_path
         self.caching = caching
         annotation_path_list = glob(path.join(bids_path, "sub-*", "ses-*", "annotation", "*annotation.nii.gz"))
@@ -90,6 +55,7 @@ class CTBidsDataset(Dataset):
 
         self.annotation_path_list = annotation_path_list
         self.cache = {}
+        self.transform = transform
 
     def __len__(self):
         return len(self.annotation_path_list)
@@ -125,16 +91,74 @@ class CTBidsDataset(Dataset):
                 "annotation": add_background_channel(torch.tensor(channels_annotation_np, dtype=torch.float))
             }
 
-            self.cache[index] = cached_transform(self.cache[index])
+            self.cache[index] = self.transform(self.cache[index])
             return self.cache[index]
 
         else:
 
-            return cached_transform(
+            return self.transform(
                 {
                     'name': f"{participant_id}_{session_id}_{slice_thickness}_{registration}",
                     "ct": torch.tensor(ct_np, dtype=torch.float),
                     "annotation": add_background_channel(torch.tensor(channels_annotation_np, dtype=torch.float))
+                }
+            )
+
+
+class AllBidsDataset(Dataset):
+    def __init__(self, bids_path: str, slice_thickness: str = None,
+                 exclude_registered: object = True,
+                 caching: object = True, transform=cached_transform):
+        self.bids_path = bids_path
+        self.caching = caching
+        path_list = glob(path.join(self.bids_path, "sub-*", "ses-*", "*ct", "*_ct*"))
+
+        # Keep only participants with the wanted slice thickness if given
+        if slice_thickness is not None:
+            path_list = [img_path for img_path in path_list if
+                         f"slicethickness-{slice_thickness}" in img_path]
+
+        if exclude_registered:
+            path_list = [img_path for img_path in path_list if
+                         "registered-true" not in img_path]
+
+        self.path_list = path_list
+        self.cache = {}
+        self.transform = transform
+
+    def __len__(self):
+        return len(self.path_list)
+
+    def __getitem__(self, index):
+
+        if self.caching and index in self.cache:
+            return self.cache[index]
+
+        scan_path = self.path_list[index]
+        participant_path = path.dirname(path.dirname(scan_path))
+        participant_id, session_id, _, slice_thickness, registration, _ = path.basename(scan_path).split("_")
+        ct_path = path.join(participant_path, "ct",
+                            f"{participant_id}_{session_id}_{slice_thickness}_{registration}_ct.nii.gz")
+
+        nifti_data = nib.load(ct_path)
+        ct_np = nifti_data.get_fdata()
+
+        if self.caching:
+
+            self.cache[index] = {
+                'name': f"{participant_id}_{session_id}_{slice_thickness}_{registration}",
+                "ct": torch.tensor(ct_np, dtype=torch.float),
+            }
+
+            self.cache[index] = self.transform(self.cache[index])
+            return self.cache[index]
+
+        else:
+
+            return self.transform(
+                {
+                    'name': f"{participant_id}_{session_id}_{slice_thickness}_{registration}",
+                    "ct": torch.tensor(ct_np, dtype=torch.float),
                 }
             )
 

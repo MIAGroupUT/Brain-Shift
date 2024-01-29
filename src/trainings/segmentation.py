@@ -1,6 +1,6 @@
 import torch
 import monai
-from src.data_loading.BidsDataset import CTBidsDataset, SliceDataset, Dataset3D
+from src.data_loading.datasets import AnnotatedBidsDataset, SliceDataset, Dataset3D
 from monai.data import DataLoader
 import wandb
 from src.utils.brain_visualization import vis_to_wandb_segmentation, vis_to_wandb_segmentation_3d
@@ -23,7 +23,7 @@ def train_segmentation(run_name, location, batch_size, num_epochs=1000, slice_th
 
     print("Loading data_loading")
 
-    dataset = CTBidsDataset(f"{location}/data", slice_thickness=slice_thickness)
+    dataset = AnnotatedBidsDataset(f"{location}/data", slice_thickness=slice_thickness)
     dataloader = None
     model = None
 
