@@ -7,3 +7,5 @@ matplotlib
 kornia
 scipy
 wandb
+scikit-learn
+einops

@@ -6,18 +6,23 @@ import wandb
 from src.utils.brain_visualization import vis_to_wandb_segmentation
 from tqdm import tqdm
 import os
+import shutil
 
 
 def train_segmentation(run_name, location, batch_size, num_epochs=5000, use_only_full_images=True, lr=3e-4, device="cuda", dims=2):
 
     out_dir = f"{location}/outputs/{run_name}"
-    os.mkdir(path=out_dir)
+    try:
+        os.mkdir(path=out_dir)
+    except FileExistsError:
+        shutil.rmtree(out_dir, ignore_errors=True)
+        os.mkdir(path=out_dir)
     os.mkdir(path=f"{out_dir}/weights")
     os.mkdir(path=f"{out_dir}/visuals")
     os.mkdir(path=f"{out_dir}/segmentations")
 
     print("Loading data_loading")
-    dataset = CTBidsDataset(f"{location}/data_loading/bids", slice_thickness=("small" if use_only_full_images else None))
+    dataset = CTBidsDataset(f"{location}/data", slice_thickness=("small" if use_only_full_images else None))
     dataloader = None
     model = None
 

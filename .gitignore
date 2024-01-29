@@ -6,3 +6,5 @@ outputs
 **/.ipynb_checkpoints
 .idea
 .vscode
+scripts/err.err
+scripts/main_output.log
