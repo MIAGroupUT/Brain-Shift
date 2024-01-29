@@ -55,6 +55,62 @@ def vis_to_wandb_segmentation(img, output, mask, names, loss, epoch, save=False,
         plt.close(fig)
 
 
+def vis_to_wandb_segmentation_3d(img, output, mask, names, loss, epoch, save=False, save_path=None):
+    with torch.no_grad():
+        # Get the predicted masks from the output logits
+        _, predicted_masks = torch.max(output, dim=1)
+        _, mask = torch.max(mask, dim=1)
+
+        # Convert the inputs, labels, and predicted masks to numpy arrays
+        inputs = img.cpu().detach().numpy()
+        labels = mask.cpu().detach().numpy()
+        predicted_masks = predicted_masks.cpu().detach().numpy()
+
+        # From the batch
+        i = 0
+        name = names[i]
+        image = inputs[i, 0]
+        label = labels[i]
+        predicted_mask = predicted_masks[i]
+
+        halves = [x // 2 for x in image.shape]
+
+        # Create a figure with 3 subplots
+        fig, axs = plt.subplots(3, 3, figsize=(15, 15))
+
+        cmap = plt.cm.get_cmap('tab10', 4)
+
+        # Plot the input image in the first subplot
+        axs[2, 0].imshow(image[halves[0]], cmap="gray", aspect='auto')
+        axs[1, 0].imshow(image[:, halves[1]], cmap="gray", aspect='auto')
+        axs[0, 0].imshow(image[:, :, halves[2]], cmap="gray")
+
+        axs[0, 0].set_title(f'Input image')
+
+        # Plot the label in the second subplot
+        axs[2, 1].imshow(label[halves[0]], cmap=cmap, vmin=0, vmax=3, aspect='auto')
+        axs[1, 1].imshow(label[:, halves[1]], cmap=cmap, vmin=0, vmax=3, aspect='auto')
+        axs[0, 1].imshow(label[:, :, halves[2]], cmap=cmap, vmin=0, vmax=3)
+
+        axs[0, 1].set_title(f'Label')
+
+        # Plot the predicted mask in the third subplot
+        axs[2, 2].imshow(predicted_mask[halves[0]], cmap=cmap, vmin=0, vmax=3, aspect='auto')
+        axs[1, 2].imshow(predicted_mask[:, halves[1]], cmap=cmap, vmin=0, vmax=3, aspect='auto')
+        axs[0, 2].imshow(predicted_mask[:, :, halves[2]], cmap=cmap, vmin=0, vmax=3)
+
+        axs[0, 2].set_title(f'Predicted mask')
+
+        fig.suptitle(f"{name}  loss: {loss}")
+
+        if save:
+            assert save_path is not None
+            plt.savefig(f'{save_path}/{epoch}.png', dpi=200)
+
+        wandb.log({"plot": fig})
+        plt.close(fig)
+
+
 def plot_from3d(img, slice=200, line=True, mask=None):
     s = None
     if len(img.shape) == 5:

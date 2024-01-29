@@ -3,14 +3,14 @@ import monai
 from src.data_loading.BidsDataset import CTBidsDataset, SliceDataset, Dataset3D
 from monai.data import DataLoader
 import wandb
-from src.utils.brain_visualization import vis_to_wandb_segmentation
+from src.utils.brain_visualization import vis_to_wandb_segmentation, vis_to_wandb_segmentation_3d
 from tqdm import tqdm
 import os
 import shutil
 
 
-def train_segmentation(run_name, location, batch_size, num_epochs=5000, use_only_full_images=True, lr=3e-4, device="cuda", dims=2):
-
+def train_segmentation(run_name, location, batch_size, num_epochs=5000, slice_thickness='small', lr=3e-4, device="cuda",
+                       dims=2):
     out_dir = f"{location}/outputs/{run_name}"
     try:
         os.mkdir(path=out_dir)
@@ -22,7 +22,8 @@ def train_segmentation(run_name, location, batch_size, num_epochs=5000, use_only
     os.mkdir(path=f"{out_dir}/segmentations")
 
     print("Loading data_loading")
-    dataset = CTBidsDataset(f"{location}/data", slice_thickness=("small" if use_only_full_images else None))
+
+    dataset = CTBidsDataset(f"{location}/data", slice_thickness=slice_thickness)
     dataloader = None
     model = None
 
@@ -74,11 +75,15 @@ def train_segmentation(run_name, location, batch_size, num_epochs=5000, use_only
             wandb.log({"training_loss": loss.item()})
 
         if epoch % 5 == 0:
-            vis_to_wandb_segmentation(img, out, mask, names, loss.item(), epoch=epoch)
+            vis_to_wandb_segmentation(img, out, mask, names, loss.item(), epoch=epoch) if dims == 2 \
+                else vis_to_wandb_segmentation_3d(img, out, mask, names, loss.item(), epoch=epoch)
 
         if epoch % 200 == 0:
-
             torch.save(model.state_dict(), f"{out_dir}/weights/{epoch}.pt")
-            vis_to_wandb_segmentation(img, out, mask, names, loss.item(), epoch=epoch, save=True, save_path=f"{out_dir}/visuals")
+
+            vis_to_wandb_segmentation(img, out, mask, names, loss.item(), epoch=epoch, save=True,
+                                      save_path=f"{out_dir}/visuals") if dims == 2 else vis_to_wandb_segmentation_3d(
+                img, out, mask, names, loss.item(), epoch=epoch, save=True,
+                save_path=f"{out_dir}/visuals")
 
         scheduler.step()

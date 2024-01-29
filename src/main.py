@@ -10,4 +10,4 @@ if __name__ == '__main__':
                entity="barisimre",
                name=run_name)
 
-    train_segmentation(batch_size=8, run_name=run_name, location=location)
+    train_segmentation(batch_size=8, run_name=run_name, location=location, slice_thickness="large", dims=3)

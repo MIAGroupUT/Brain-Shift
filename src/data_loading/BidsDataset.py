@@ -60,8 +60,9 @@ def add_background_channel(annotations):
 
 
 class CTBidsDataset(Dataset):
-    def __init__(self, bids_path: str, slice_thickness: Literal['small', 'large'] = None, exclude_registered=True,
-                 caching=True):
+    def __init__(self, bids_path: str, slice_thickness: str = None,
+                 exclude_registered: object = True,
+                 caching: object = True) -> object:
         self.bids_path = bids_path
         self.caching = caching
         annotation_path_list = glob(path.join(bids_path, "sub-*", "ses-*", "annotation", "*annotation.nii.gz"))
