@@ -26,9 +26,8 @@ def optimize_centers(run_name, num_epochs, location, batch_size=1):
 
     print("Loading data_loading")
     dataset = AllBidsDataset(f"{location}/data", slice_thickness='small', caching=False)
-    dataset_3d = Dataset3D(dataset, use_random_transforms=False)
 
-    dataloader = DataLoader(dataset_3d, batch_size=batch_size, shuffle=True)
+    dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=True)
 
     for brain in tqdm(dataloader, position=0):
 
