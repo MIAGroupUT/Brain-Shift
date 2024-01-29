@@ -1,4 +1,5 @@
 torch
+torchvision
 monai
 nibabel
 tqdm

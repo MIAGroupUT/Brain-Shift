@@ -136,7 +136,7 @@ class AllBidsDataset(Dataset):
 
         scan_path = self.path_list[index]
         participant_path = path.dirname(path.dirname(scan_path))
-        participant_id, session_id, _, slice_thickness, registration, _ = path.basename(scan_path).split("_")
+        participant_id, session_id, slice_thickness, registration, _ = path.basename(scan_path).split("_")
         ct_path = path.join(participant_path, "ct",
                             f"{participant_id}_{session_id}_{slice_thickness}_{registration}_ct.nii.gz")
 
@@ -180,8 +180,9 @@ class SliceDataset(Dataset):
 
 
 class Dataset3D(Dataset):
-    def __init__(self, base_dataset):
+    def __init__(self, base_dataset, use_random_transforms=True):
         self.base_dataset = base_dataset
+        self.use_random_transforms = use_random_transforms
 
     def __len__(self):
         return len(self.base_dataset)
@@ -189,6 +190,8 @@ class Dataset3D(Dataset):
     def __getitem__(self, idx):
         # Load the full 3D volume using the base dataset
         data = self.base_dataset[idx]
-        data = random_transform_3d(data)
+
+        if self.use_random_transforms:
+            data = random_transform_3d(data)
 
         return data

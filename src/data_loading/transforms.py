@@ -13,6 +13,7 @@ cached_transform = monai.transforms.Compose([
         b_min=0,
         b_max=1,
         clip=True,
+        allow_missing_keys=True,
     ),
 ])
 
