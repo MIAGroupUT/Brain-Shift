@@ -9,7 +9,7 @@ import os
 import shutil
 
 
-def train_segmentation(run_name, location, batch_size, num_epochs=5000, slice_thickness='small', lr=3e-4, device="cuda",
+def train_segmentation(run_name, location, batch_size, num_epochs=1000, slice_thickness='small', lr=3e-4, device="cuda",
                        dims=2):
     out_dir = f"{location}/outputs/{run_name}"
     try:
@@ -44,20 +44,20 @@ def train_segmentation(run_name, location, batch_size, num_epochs=5000, slice_th
         dataloader = DataLoader(dataset_3d, batch_size=batch_size, shuffle=True)
 
         model = monai.networks.nets.SwinUNETR(
-            img_size=(256, 256, 30),
+            img_size=(256, 256, 32),
             spatial_dims=3,
             in_channels=1,
             out_channels=4,
             drop_rate=0.2
-        )
+        ).to(device)
 
     optimizer = torch.optim.Adam(model.parameters(), lr=lr)
     scheduler = torch.optim.lr_scheduler.ExponentialLR(optimizer, gamma=0.9993)
     loss_fn = monai.losses.DiceLoss()
+    
+    model.train()
 
     for epoch in tqdm(range(num_epochs)):
-        model.train()
-        print("Training")
 
         for d in dataloader:
             names = d['name']
@@ -74,16 +74,15 @@ def train_segmentation(run_name, location, batch_size, num_epochs=5000, slice_th
             optimizer.step()
             wandb.log({"training_loss": loss.item()})
 
-        if epoch % 5 == 0:
-            vis_to_wandb_segmentation(img, out, mask, names, loss.item(), epoch=epoch) if dims == 2 \
-                else vis_to_wandb_segmentation_3d(img, out, mask, names, loss.item(), epoch=epoch)
-
-        if epoch % 200 == 0:
-            torch.save(model.state_dict(), f"{out_dir}/weights/{epoch}.pt")
+        if epoch % 20 == 0:
 
             vis_to_wandb_segmentation(img, out, mask, names, loss.item(), epoch=epoch, save=True,
                                       save_path=f"{out_dir}/visuals") if dims == 2 else vis_to_wandb_segmentation_3d(
                 img, out, mask, names, loss.item(), epoch=epoch, save=True,
                 save_path=f"{out_dir}/visuals")
+            
+        if epoch % 200 == 0:
+            torch.save(model.state_dict(), f"{out_dir}/weights/{epoch}.pt")
+
 
         scheduler.step()

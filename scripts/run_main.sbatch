@@ -9,7 +9,5 @@
 
 cd /home/imreb/brain-morphing
 
-module load nvidia/nvhpc/23.3
-
 export HTTPS_PROXY=http://proxy.utwente.nl:3128
 python -m src.main
