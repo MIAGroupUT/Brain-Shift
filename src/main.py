@@ -5,8 +5,8 @@ import wandb
 if __name__ == '__main__':
 
     run_name = "centering"
-    # location = "/home/baris/Documents/brain-morphing"
-    location = "/home/imreb/brain-morphing"
+    location = "/home/baris/Documents/brain-morphing"
+    # location = "/home/imreb/brain-morphing"
 
     wandb.init(project="debug",
                entity="barisimre",
