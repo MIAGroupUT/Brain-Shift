@@ -147,7 +147,6 @@ def detailed_plot_from3d(img, slice=None, line=True, name="unnamed", loss=0.0, s
     if slice is None:
         slice_z = int(min(torch.tensor(img.shape[-3:]) / 2))
         slice_x = int(max(torch.tensor(img.shape[-3:]) / 2))
-        print(slice_x, slice_z, img.shape)
     else:
         slice_z = slice
         slice_x = slice
