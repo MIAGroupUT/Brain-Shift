@@ -6,6 +6,8 @@ import torchvision
 import monai
 import wandb
 import einops
+from pytorch_msssim import ssim, ms_ssim, SSIM, MS_SSIM
+
 
 dice_loss_no_background = monai.losses.DiceLoss(include_background=False)
 
@@ -40,7 +42,7 @@ def jeffreys_divergence_loss(img, bins=90):
     return torch.sum(pi * torch.log(((pi + eps) / (qi + eps)))) + torch.sum(qi * torch.log(((qi + eps) / (pi + eps))))
 
 
-def ssim_loss(img, kernel_size=23):
+def ssim_loss(img, kernel_size=23, use_other=False):
     width = img.shape[3]
     half_width = width // 2
 
@@ -51,6 +53,8 @@ def ssim_loss(img, kernel_size=23):
     if half1.shape[3] != half2.shape[3]:
         half2 = half2[:, :, :, :-1, :]
 
+    if use_other:
+        return ssim(half1, half2, data_range=1, size_average=True, win_size=23)
     return kornia.losses.ssim3d_loss(half1, torch.flip(half2, [3]), kernel_size)
 
 

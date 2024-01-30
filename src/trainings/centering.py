@@ -48,7 +48,7 @@ def optimize_centers(run_name, num_epochs, location, batch_size=1):
 
             t = translate_and_rotate(img, 100. * yaw, 100. * pitch, 100. * translation)
 
-            s = ssim_loss(t)
+            s = ssim_loss(t, use_other=True)
             j = 10.0 * jeffreys_divergence_loss(t)
             p = pixel_loss(t, binary=False)
 
