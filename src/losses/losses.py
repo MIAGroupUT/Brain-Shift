@@ -54,7 +54,7 @@ def ssim_loss(img, kernel_size=23, use_other=False):
         half2 = half2[:, :, :, :-1, :]
 
     if use_other:
-        return ssim(half1, half2, data_range=1, size_average=True, win_size=23)
+        return 1.0 - ssim(half1, half2, data_range=1, size_average=True, win_size=23)
     return kornia.losses.ssim3d_loss(half1, torch.flip(half2, [3]), kernel_size)
 
 
