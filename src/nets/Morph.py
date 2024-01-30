@@ -36,14 +36,13 @@ class Morph(nn.Module):
 
         self.spatial_transformer = SpatialTransformer(size=in_shape)
 
-    def forward(self, full_img, stripped_img):
+    def forward(self, img):
 
-        x = self.unet(stripped_img)
+        x = self.unet(img)
 
         velocity_field = self.flow_conv(x)
         deformation_field = self.integrate(velocity_field)
 
-        morphed_image_full = self.spatial_transformer(full_img, deformation_field)
-        morphed_image_stripped = self.spatial_transformer(stripped_img, deformation_field)
+        morphed_image_full = self.spatial_transformer(img, deformation_field)
 
-        return morphed_image_full, morphed_image_stripped, velocity_field, deformation_field
+        return morphed_image_full, velocity_field, deformation_field
