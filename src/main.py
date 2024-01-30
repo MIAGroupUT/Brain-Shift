@@ -4,11 +4,13 @@ import wandb
 
 if __name__ == '__main__':
 
-    run_name = "center_75_0_02"
+
+    run_name = "new_ssim"
     # location = "/home/baris/Documents/brain-morphing"
     location = "/home/imreb/brain-morphing"
+    # location = "/home/baris/Documents/work/brain-morphing"
 
-    wandb.init(project="centering",
+    wandb.init(project="debug",
                entity="barisimre",
                name=run_name)
 
