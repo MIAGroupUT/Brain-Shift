@@ -10,3 +10,4 @@ scipy
 wandb
 scikit-learn
 einops
+pytorch-msssim
