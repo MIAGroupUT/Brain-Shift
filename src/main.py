@@ -4,11 +4,11 @@ import wandb
 
 if __name__ == '__main__':
 
-    run_name = "centering"
-    location = "/home/baris/Documents/brain-morphing"
-    # location = "/home/imreb/brain-morphing"
+    run_name = "center_75_0_02"
+    # location = "/home/baris/Documents/brain-morphing"
+    location = "/home/imreb/brain-morphing"
 
-    wandb.init(project="debug",
+    wandb.init(project="centering",
                entity="barisimre",
                name=run_name)
 

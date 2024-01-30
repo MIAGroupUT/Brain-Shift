@@ -29,8 +29,8 @@ random_transform_2d = monai.transforms.Compose([
 
 
 random_transform_3d = monai.transforms.Compose([
-    monai.transforms.RandRotated(keys=['ct', 'annotation'], range_z=3, prob=1, padding_mode="zeros",
-                                 align_corners=True),
+    # monai.transforms.RandRotated(keys=['ct', 'annotation'], range_z=3, prob=1, padding_mode="zeros",
+    #                              align_corners=True),
     monai.transforms.RandCropByPosNegLabeld(keys=['ct', 'annotation'], spatial_size=(256, 256, 32),
                                             label_key='annotation', num_samples=1, pos=1),
 
