@@ -5,7 +5,7 @@ import wandb
 if __name__ == '__main__':
 
 
-    run_name = "new_ssim"
+    run_name = "centering_binary"
     # location = "/home/baris/Documents/brain-morphing"
     location = "/home/imreb/brain-morphing"
     # location = "/home/baris/Documents/work/brain-morphing"

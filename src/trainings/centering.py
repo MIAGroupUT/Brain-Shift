@@ -42,6 +42,7 @@ def optimize_centers(run_name, num_epochs, location, batch_size=1):
         tqdm.write(f"Optimizing for: {name}")
 
         img = brain['ct'].to("cuda").unsqueeze(dim=0)
+        img = img[img != 0].float()
 
         for e in tqdm(range(num_epochs), position=1):
             optimizer.zero_grad()
@@ -49,10 +50,10 @@ def optimize_centers(run_name, num_epochs, location, batch_size=1):
             t = translate_and_rotate(img, 100. * yaw, 100. * pitch, 100. * translation)
 
             s = ssim_loss(t, use_other=True)
-            j = 5.0 * jeffreys_divergence_loss(t)
-            p = 2.0 * pixel_loss(t, binary=True)
+            # j = 5.0 * jeffreys_divergence_loss(t)
+            p = pixel_loss(t, binary=True)
 
-            loss = s + j + p
+            loss = s + p
 
             loss.backward()
             optimizer.step()
