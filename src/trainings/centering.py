@@ -38,7 +38,6 @@ def optimize_centers(run_name, num_epochs, location, batch_size=1):
         translation = 0.08
 
         name = brain['name'][0]
-        tqdm.write(f"Optimizing for: {name}")
 
         img = brain['ct'].to("cuda").unsqueeze(dim=0)
         # img = img[img != 0].float()
