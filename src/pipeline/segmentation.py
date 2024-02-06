@@ -10,6 +10,7 @@ import nibabel
 
 
 def infer_segmentation(location, relative_model_path, run_name, slice_thickness="large", device="cuda"):
+
     out_dir = f"{location}/outputs/inferred/segmentation/{run_name}"
     try:
         os.mkdir(path=out_dir)
@@ -34,7 +35,7 @@ def infer_segmentation(location, relative_model_path, run_name, slice_thickness=
     ).to(device)
 
     model.eval()
-    model.load_state_dict(torch.load(f"{location}/{relative_model_path}"))
+    model.load_state_dict(torch.load(f"{location}/outputs/{relative_model_path}"))
 
     inferer = monai.inferers.SlidingWindowInferer(
         roi_size=roi,

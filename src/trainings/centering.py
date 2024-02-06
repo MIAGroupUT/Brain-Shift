@@ -1,3 +1,4 @@
+import torch.nn
 from torch.utils.data import DataLoader
 import wandb
 from src.data_loading.datasets import AllBidsDataset, Dataset3D
@@ -32,28 +33,38 @@ def optimize_centers(run_name, num_epochs, location, batch_size=1):
     for brain in tqdm(dataloader, position=0):
 
         # Parameters to optimize, initial values are guesses based on a few manual examples
-        yaw = torch.tensor([0.8], requires_grad=True, device="cuda")
-        pitch = torch.tensor([0.05], requires_grad=True, device="cuda")
-        translation = torch.tensor([0.08], requires_grad=True, device="cuda")
-
-        optimizer = torch.optim.Adam([yaw, pitch, translation], lr=0.01)
+        yaw = 0.8
+        pitch = 0.05
+        translation = 0.08
 
         name = brain['name'][0]
-        tqdm.write(f"Optimizing for: {name}")
 
         img = brain['ct'].to("cuda").unsqueeze(dim=0)
-        img = img[img != 0].float()
+        # img = img[img != 0].float()
+
+        mlp = torch.nn.Sequential(
+            torch.nn.Linear(3, 5),
+            torch.nn.ReLU(),
+            torch.nn.Linear(5, 5),
+            torch.nn.ReLU(),
+            torch.nn.Linear(5, 3),
+            torch.nn.Sigmoid()
+        )
+
+        optimizer = torch.optim.Adam(mlp.parameters(), lr=3e-4)
 
         for e in tqdm(range(num_epochs), position=1):
             optimizer.zero_grad()
 
+            yaw, pitch, translation = mlp(torch.tensor([yaw, pitch, translation], requires_grad=True, device="cuda"))
+
             t = translate_and_rotate(img, 100. * yaw, 100. * pitch, 100. * translation)
 
             s = ssim_loss(t, use_other=True)
-            # j = 5.0 * jeffreys_divergence_loss(t)
+            j = 5.0 * jeffreys_divergence_loss(t)
             p = pixel_loss(t, binary=True)
 
-            loss = s + p
+            loss = s + p + j
 
             loss.backward()
             optimizer.step()

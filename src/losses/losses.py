@@ -29,7 +29,6 @@ def pixel_loss(img, binary=False):
         return (torch.abs(torch.sum(half1) - torch.sum(half2)) + 1e-8) / torch.sum(img)
 
 
-
 def jeffreys_divergence_loss(img, bins=90):
     hist_x = differentiable_histogram(img[:, :, :, :img.shape[3] // 2, :], n_bins=bins)[0]
     hist_y = differentiable_histogram(img[:, :, :, img.shape[3] // 2:, :], n_bins=bins)[0]
