@@ -10,7 +10,7 @@ import os
 import shutil
 
 
-def train_morph(run_name, num_epochs, location, batch_size=1, lr=3e-4):
+def train_morph(run_name, num_epochs, location, location_centers, batch_size=1, lr=3e-4):
     print(f"Started morphing things out: {run_name}")
 
     save_location = f"{location}/outputs/morph/{run_name}"

@@ -30,11 +30,11 @@ def optimize_centers(run_name, num_epochs, location, batch_size=1):
 
     dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=True)
 
-    # Initial values
-    yaw_init = 0.8
-    pitch_init = 0.05
+    # Initial values, transpose did help a lot
+    yaw_init = 0.01
+    pitch_init = 0.01
     roll_init = 0.01
-    translation_init = 0.08
+    translation_init = 0.01
 
     for brain in tqdm(dataloader, position=0):
 
@@ -44,12 +44,12 @@ def optimize_centers(run_name, num_epochs, location, batch_size=1):
         roll = torch.tensor([0.0001], requires_grad=True, device="cuda")
         translation = torch.tensor([0.0001], requires_grad=True, device="cuda")
 
-        optimizer = torch.optim.Adam([yaw, pitch, roll, translation], lr=0.03)
+        optimizer = torch.optim.Adam([yaw, pitch, roll, translation], lr=0.01)
 
         name = brain['name'][0]
         tqdm.write(f"Optimizing for: {name}")
 
-        img = brain['ct'].to("cuda").unsqueeze(dim=0)
+        img = brain['ct'].to("cuda").transpose(1, 2).unsqueeze(dim=0)
 
         for e in tqdm(range(num_epochs), position=1):
             optimizer.zero_grad()
@@ -62,7 +62,7 @@ def optimize_centers(run_name, num_epochs, location, batch_size=1):
 
             s = ssim_loss(t, use_other=True)
             j = 5.0 * jeffreys_divergence_loss(t)
-            p = pixel_loss(t, binary=True)
+            p = 2.0 * pixel_loss(t, binary=True)
 
             loss = s + j + p
 
@@ -71,8 +71,8 @@ def optimize_centers(run_name, num_epochs, location, batch_size=1):
 
             wandb.log({name: loss.item()})
 
-            if e % 10 == 0:
-                detailed_plot_from3d(t, name=f"{name}", use_wandb=True, loss=loss.item())
+            # if e % 10 == 0:
+            #     detailed_plot_from3d(t, name=f"{name}", use_wandb=True, loss=loss.item())
 
         # Do it one last time for logging
         t = translate_and_rotate(img,
