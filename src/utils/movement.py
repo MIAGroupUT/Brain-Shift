@@ -1,6 +1,6 @@
 import torch
 import kornia
-from kornia.geometry.transform import rotate3d
+from kornia.geometry.transform import rotate3d, translate
 
 
 # By default, it is okay to not use roll.
