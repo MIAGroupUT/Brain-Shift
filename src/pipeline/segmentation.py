@@ -43,7 +43,8 @@ def infer_segmentation(location, relative_model_path, run_name, slice_thickness=
         sw_batch_size=2,
         overlap=0.5,
         sw_device=device,
-        device="cpu"
+        device="cpu",
+        progress=True
     )
 
     for item in tqdm(dataloader, position=0):

@@ -139,7 +139,7 @@ def compute_jacobian_det(displacement, voxel_spacing=(1, 1, 1)):
     Args:
     - displacement (array): Size of b*h*w*d*3 in the cubic volume of [-1, 1]^3.
     - voxel_spacing (tuple): Spacing of voxels in x, y, z directions. Default is (1, 1, 1).
-
+er segmentation changes"
     Returns:
     - Jacobian determinant (array): The calculated Jacobian determinant at each voxel.
     """

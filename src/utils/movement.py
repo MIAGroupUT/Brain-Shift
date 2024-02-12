@@ -3,7 +3,7 @@ import kornia
 from kornia.geometry.transform import rotate3d
 
 
-# By default it is okay to not use roll.
+# By default, it is okay to not use roll.
 def rotate(img, yaw, pitch, roll=torch.tensor([0.], requires_grad=True)):
     return rotate3d(img, yaw, pitch, roll.to(img.device))
 
@@ -17,8 +17,8 @@ def translate(img, x):
     return kornia.geometry.transform.affine3d(img, affine)
 
 
-def translate_and_rotate(img, yaw, pitch, x):
-    img = rotate(img, yaw, pitch)
+def translate_and_rotate(img, yaw, pitch, roll,  x):
+    img = rotate(img, yaw, pitch, roll)
     img = translate(img, x)
     return img
 
