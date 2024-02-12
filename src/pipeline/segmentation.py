@@ -42,7 +42,8 @@ def infer_segmentation(location, relative_model_path, run_name, slice_thickness=
         sw_batch_size=2,
         overlap=0.5,
         sw_device=device,
-        device="cpu"
+        device="cpu",
+        progress=True
     )
 
     for item in tqdm(dataloader, position=0):
@@ -50,6 +51,6 @@ def infer_segmentation(location, relative_model_path, run_name, slice_thickness=
         brain = item['ct']
         name = item['name'][0]
         with torch.no_grad():
-            output = inferer(inputs=brain, network=model, progress=True)
+            output = inferer(inputs=brain, network=model)
             nibabel.save(brain, f"{out_dir}/out/{name}")
             nibabel.save(output, f"{out_dir}/out/{name}_mask")
