@@ -52,6 +52,8 @@ def vis_to_wandb_segmentation(img, output, mask, names, loss, epoch, save=False,
             plt.savefig(f'{save_path}/{epoch}.png', dpi=200)
         if use_wandb:
             wandb.log({"plot": fig})
+        else:
+            plt.show()
         plt.close(fig)
 
 
