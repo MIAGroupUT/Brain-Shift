@@ -83,6 +83,6 @@ def optimize_centers(run_name, num_epochs, location, batch_size=1):
         detailed_plot_from3d(t, save=True, save_location=f"{save_location}/visuals",
                              name=name, use_wandb=True)
 
-        ps = [yaw, pitch, translation]
+        ps = [100. * (yaw + yaw_init), 100. * (pitch + pitch_init), 100 * (roll + roll_init), 100. * (translation + translation_init)]
         ps = [p.cpu().detach().numpy() for p in ps]
         np.save(f"{save_location}/rotations/{name}", np.array(ps))
