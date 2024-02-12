@@ -88,7 +88,8 @@ class AnnotatedBidsDataset(Dataset):
             self.cache[index] = {
                 'name': f"{participant_id}_{session_id}_{slice_thickness}_{registration}",
                 "ct": torch.tensor(ct_np, dtype=torch.float),
-                "annotation": add_background_channel(torch.tensor(channels_annotation_np, dtype=torch.float))
+                "annotation": add_background_channel(torch.tensor(channels_annotation_np, dtype=torch.float)),
+                'affine': nifti_data.affine
             }
 
             self.cache[index] = self.transform(self.cache[index])
@@ -100,7 +101,8 @@ class AnnotatedBidsDataset(Dataset):
                 {
                     'name': f"{participant_id}_{session_id}_{slice_thickness}_{registration}",
                     "ct": torch.tensor(ct_np, dtype=torch.float),
-                    "annotation": add_background_channel(torch.tensor(channels_annotation_np, dtype=torch.float))
+                    "annotation": add_background_channel(torch.tensor(channels_annotation_np, dtype=torch.float)),
+                    'affine': nifti_data.affine
                 }
             )
 
@@ -148,6 +150,7 @@ class AllBidsDataset(Dataset):
             self.cache[index] = {
                 'name': f"{participant_id}_{session_id}_{slice_thickness}_{registration}",
                 "ct": torch.tensor(ct_np, dtype=torch.float),
+                'affine': nifti_data.affine
             }
 
             self.cache[index] = self.transform(self.cache[index])
@@ -159,6 +162,7 @@ class AllBidsDataset(Dataset):
                 {
                     'name': f"{participant_id}_{session_id}_{slice_thickness}_{registration}",
                     "ct": torch.tensor(ct_np, dtype=torch.float),
+                    'affine': nifti_data.affine
                 }
             )
 

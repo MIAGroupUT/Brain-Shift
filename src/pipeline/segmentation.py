@@ -7,6 +7,7 @@ from tqdm import tqdm
 import os
 import shutil
 import nibabel
+import numpy as np
 
 
 def infer_segmentation(location, relative_model_path, run_name, slice_thickness="large", device="cuda"):
@@ -21,7 +22,7 @@ def infer_segmentation(location, relative_model_path, run_name, slice_thickness=
     os.mkdir(path=f"{out_dir}/out")
 
     # Load the data
-    dataset = AllBidsDataset(f"{location}/data", slice_thickness=slice_thickness)
+    dataset = AllBidsDataset(f"{location}/data", slice_thickness=slice_thickness, exclude_registered=False)
     dataloader = DataLoader(dataset, batch_size=1, shuffle=True)
 
     roi = (256, 256, 32)
@@ -47,9 +48,19 @@ def infer_segmentation(location, relative_model_path, run_name, slice_thickness=
 
     for item in tqdm(dataloader, position=0):
 
-        brain = item['ct']
+        brain = item['ct'].unsqueeze(dim=0)
         name = item['name'][0]
+        affine = item['affine'][0]
         with torch.no_grad():
-            output = inferer(inputs=brain, network=model, progress=True)
-            nibabel.save(brain, f"{out_dir}/out/{name}")
-            nibabel.save(output, f"{out_dir}/out/{name}_mask")
+            output = inferer(inputs=brain, network=model)
+            # nibabel.loadsave.save(brain.detach().cpu().numpy(), f"{out_dir}/out/{name}")
+            # nibabel.loadsave.save(output.detach().cpu().numpy(), f"{out_dir}/out/{name}_mask")
+
+            # print(output.shape)
+
+            b = nibabel.Nifti1Image(brain.detach().cpu().numpy()[0, 0], affine)
+            o = nibabel.Nifti1Image(np.argmax(output.detach().cpu().numpy()[0], axis=0).astype(float), affine)
+
+            nibabel.save(b, f"{out_dir}/out/{name}")
+            nibabel.save(o, f"{out_dir}/out/{name}_mask")
+
