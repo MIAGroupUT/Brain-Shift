@@ -1,7 +1,7 @@
 import monai
 
-WINDOW_MIN = -5
-WINDOW_MAX = 85
+WINDOW_MIN = -20
+WINDOW_MAX = 100
 
 # TODO: add some correct rotations here
 cached_transform = monai.transforms.Compose([
