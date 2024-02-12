@@ -61,10 +61,11 @@ def optimize_centers(run_name, num_epochs, location, batch_size=1):
                                      100. * (translation + translation_init))
 
             s = ssim_loss(t, use_other=True)
-            j = 5.0 * jeffreys_divergence_loss(t)
-            p = 2.0 * pixel_loss(t, binary=True)
+            # j = 5.0 * jeffreys_divergence_loss(t)
+            p = 15.0 * pixel_loss(t, binary=True)
 
-            loss = s + j + p
+            # loss = s + j + p
+            loss = s + p
 
             loss.backward()
             optimizer.step()
