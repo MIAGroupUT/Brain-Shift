@@ -57,10 +57,10 @@ def optimize_centers(run_name, num_epochs, location, batch_size=1):
             optimizer.zero_grad()
 
             t = translate_and_rotate(img,
-                                     100. * (yaw + yaw_init),
-                                     100. * (pitch + pitch_init),
-                                     100 * (roll + roll_init),
-                                     100. * (translation + translation_init))
+                                     100. * yaw,
+                                     100. * pitch,
+                                     100 * roll,
+                                     100. * translation)
 
             s = ssim_loss(t, use_other=True)
             # j = 5.0 * jeffreys_divergence_loss(t)
@@ -86,6 +86,6 @@ def optimize_centers(run_name, num_epochs, location, batch_size=1):
         detailed_plot_from3d(t, save=True, save_location=f"{save_location}/visuals",
                              name=name, use_wandb=True)
 
-        ps = [100. * (yaw + yaw_init), 100. * (pitch + pitch_init), 100 * (roll + roll_init), 100. * (translation + translation_init)]
+        ps = [100. * yaw, 100. * pitch, 100 * roll, 100. * translation]
         ps = [p.cpu().detach().numpy() for p in ps]
         np.save(f"{save_location}/rotations/{name}", np.array(ps))
