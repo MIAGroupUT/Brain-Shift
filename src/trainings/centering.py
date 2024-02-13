@@ -39,12 +39,14 @@ def optimize_centers(run_name, num_epochs, location, batch_size=1):
     for brain in tqdm(dataloader, position=0):
 
         # Parameters to optimize, initial values are guesses based on a few manual examples
-        yaw = torch.tensor([0.0001], requires_grad=True, device="cuda")
-        pitch = torch.tensor([0.0001], requires_grad=True, device="cuda")
-        roll = torch.tensor([0.0001], requires_grad=True, device="cuda")
+        yaw = torch.tensor([0.0001], device="cuda")
+        pitch = torch.tensor([0.0001], device="cuda")
+        roll = torch.tensor([0.0001], device="cuda")
         translation = torch.tensor([0.0001], requires_grad=True, device="cuda")
 
-        optimizer = torch.optim.Adam([yaw, pitch, roll, translation], lr=0.01)
+        # optimizer = torch.optim.Adam([yaw, pitch, roll, translation], lr=3e-4)
+        optimizer = torch.optim.Adam([translation], lr=3e-4)
+
 
         name = brain['name'][0]
         tqdm.write(f"Optimizing for: {name}")
