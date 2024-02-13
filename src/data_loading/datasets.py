@@ -198,6 +198,4 @@ class Dataset3D(Dataset):
 
         return data
 
-class RotatedAndSegmentedDataset(Dataset):
-    pass
 
