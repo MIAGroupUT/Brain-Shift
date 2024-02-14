@@ -8,26 +8,48 @@ import wandb
 import einops
 from pytorch_msssim import ssim, ms_ssim, SSIM, MS_SSIM
 
-
 dice_loss_no_background = monai.losses.DiceLoss(include_background=False)
+dice_loss_yes_background = monai.losses.DiceLoss()
 
+
+# def pixel_loss(img, binary=False):
+#     width = img.shape[3]
+#     half_width = width // 2
+#
+#     half1 = img[:, :, :, :half_width, :]
+#     half2 = img[:, :, :, half_width:, :]
+#
+#     # Check the sizes, make sure they work together
+#     if half1.shape[3] != half2.shape[3]:
+#         half2 = half2[:, :, :, :-1, :]
+#
+#     if binary:
+#         return (torch.abs(torch.sum(half1 != 0) - torch.sum(half2 != 0)) + 1e-8) / torch.sum(img != 0)
+#     else:
+#         return (torch.abs(torch.sum(half1) - torch.sum(half2)) + 1e-8) / torch.sum(img)
 
 def pixel_loss(img, binary=False):
     width = img.shape[3]
     half_width = width // 2
 
-    half1 = img[:, :, :, :half_width, :]
-    half2 = img[:, :, :, half_width:, :]
+    half1 = img[:, :, :, :half_width]
+    half2 = img[:, :, :, half_width:]
 
-    # Check the sizes, make sure they work together
+    # Ensure equal dimensions for odd widths
     if half1.shape[3] != half2.shape[3]:
-        half2 = half2[:, :, :, :-1, :]
+        half2 = half2[:, :, :, :-1]
 
     if binary:
-        return (torch.abs(torch.sum(half1 != 0) - torch.sum(half2 != 0)) + 1e-8) / torch.sum(img != 0)
+        # Apply a sigmoid to softly approximate the binary condition
+        # The beta parameter controls the steepness of the transition
+        beta = 100  # This is a hyperparameter you can adjust
+        soft_binary_half1 = torch.sigmoid(beta * (half1 - 0.001))
+        soft_binary_half2 = torch.sigmoid(beta * (half2 - 0.001))
+        loss = (torch.abs(torch.sum(soft_binary_half1) - torch.sum(soft_binary_half2)) + 1e-8) / (torch.sum(torch.sigmoid(beta * (img - 0.001))) + 1e-8)
     else:
-        return (torch.abs(torch.sum(half1) - torch.sum(half2)) + 1e-8) / torch.sum(img)
+        loss = (torch.abs(torch.sum(half1) - torch.sum(half2)) + 1e-8) / torch.sum(img)
 
+    return loss
 
 def jeffreys_divergence_loss(img, bins=90):
     hist_x = differentiable_histogram(img[:, :, :, :img.shape[3] // 2, :], n_bins=bins)[0]
@@ -41,7 +63,7 @@ def jeffreys_divergence_loss(img, bins=90):
     return torch.sum(pi * torch.log(((pi + eps) / (qi + eps)))) + torch.sum(qi * torch.log(((qi + eps) / (pi + eps))))
 
 
-def ssim_loss(img, kernel_size=23, use_other=False):
+def ssim_loss(img, kernel_size=23, use_other=True):
     width = img.shape[3]
     half_width = width // 2
 
@@ -53,8 +75,22 @@ def ssim_loss(img, kernel_size=23, use_other=False):
         half2 = half2[:, :, :, :-1, :]
 
     if use_other:
-        return 1.0 - ssim(half1, half2, data_range=1, size_average=True, win_size=23)
+        return 1.0 - ssim(half1, torch.flip(half2, [3]), data_range=1, size_average=True, win_size=kernel_size)
     return kornia.losses.ssim3d_loss(half1, torch.flip(half2, [3]), kernel_size)
+
+
+def dice_binary_loss(img):
+    width = img.shape[3]
+    half_width = width // 2
+
+    half1 = img[:, :, :, :half_width, :]
+    half2 = img[:, :, :, half_width:, :]
+
+    # Check the sizes, make sure they work together
+    if half1.shape[3] != half2.shape[3]:
+        half2 = half2[:, :, :, :-1, :]
+
+    return dice_loss_yes_background(half1 != 0, torch.flip(half2 != 0, [3]))
 
 
 def half_half_mse(img, blur_kernel=13):
@@ -80,7 +116,6 @@ def get_skull(scan, skull_threshold=0.99):
 
 
 def skull_loss(original_skull, morphed_skull):
-
     return dice_loss_no_background(original_skull, morphed_skull)
 
 
@@ -233,4 +268,3 @@ def ventricle_wrong_side(deformed_left, deformed_right):
     r_loss = distance_based_loss_3D(deformed_right, 'right')
 
     return l_loss + r_loss
-
