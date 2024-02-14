@@ -11,7 +11,7 @@ import os
 import shutil
 
 
-def optimize_centers(run_name, num_epochs, location, batch_size=1):
+def optimize_centers(run_name, num_epochs, location, batch_size=1, slice_thickness="small"):
     print(f"Started optimizing centers with the run name: {run_name}")
 
     save_location = f"{location}/outputs/centering/{run_name}"
@@ -26,7 +26,7 @@ def optimize_centers(run_name, num_epochs, location, batch_size=1):
     os.mkdir(path=f"{save_location}/rotations")
 
     print("Loading data_loading")
-    dataset = AllBidsDataset(f"{location}/data", slice_thickness='small', caching=False)
+    dataset = AllBidsDataset(f"{location}/data", slice_thickness=slice_thickness, caching=False)
 
     dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=True)
 
