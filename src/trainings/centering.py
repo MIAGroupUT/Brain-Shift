@@ -30,23 +30,15 @@ def optimize_centers(run_name, num_epochs, location, batch_size=1):
 
     dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=True)
 
-    # Initial values, transpose did help a lot
-    yaw_init = 0.01
-    pitch_init = 0.01
-    roll_init = 0.01
-    translation_init = 0.01
-
     for brain in tqdm(dataloader, position=0):
 
         # Parameters to optimize, initial values are guesses based on a few manual examples
-        yaw = torch.tensor([0.0001], device="cuda")
-        pitch = torch.tensor([0.0001], device="cuda")
-        roll = torch.tensor([0.0001], device="cuda")
-        translation = torch.tensor([0.0001], requires_grad=True, device="cuda")
+        yaw = torch.tensor([0.0001], requires_grad=True, device="cuda")
+        pitch = torch.tensor([0.0001], requires_grad=True, device="cuda")
+        roll = torch.tensor([0.0001], requires_grad=True, device="cuda")
+        translation = torch.tensor([0.01], requires_grad=True, device="cuda")
 
-        # optimizer = torch.optim.Adam([yaw, pitch, roll, translation], lr=3e-4)
-        optimizer = torch.optim.Adam([translation], lr=3e-4)
-
+        optimizer = torch.optim.Adam([yaw, translation], lr=0.03)
 
         name = brain['name'][0]
         tqdm.write(f"Optimizing for: {name}")
@@ -63,10 +55,8 @@ def optimize_centers(run_name, num_epochs, location, batch_size=1):
                                      100. * translation)
 
             s = ssim_loss(t, use_other=True)
-            # j = 5.0 * jeffreys_divergence_loss(t)
-            p = 15.0 * pixel_loss(t, binary=True)
+            p = pixel_loss(t, binary=True)
 
-            # loss = s + j + p
             loss = s + p
 
             loss.backward()
@@ -74,15 +64,12 @@ def optimize_centers(run_name, num_epochs, location, batch_size=1):
 
             wandb.log({name: loss.item()})
 
-            # if e % 10 == 0:
-            #     detailed_plot_from3d(t, name=f"{name}", use_wandb=True, loss=loss.item())
-
         # Do it one last time for logging
         t = translate_and_rotate(img,
-                                 100. * (yaw + yaw_init),
-                                 100. * (pitch + pitch_init),
-                                 100 * (roll + roll_init),
-                                 100. * (translation + translation_init))
+                                 100. * yaw,
+                                 100. * pitch,
+                                 100. * roll,
+                                 100. * translation)
         detailed_plot_from3d(t, save=True, save_location=f"{save_location}/visuals",
                              name=name, use_wandb=True)
 

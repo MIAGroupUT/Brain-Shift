@@ -42,10 +42,10 @@ def infer_segmentation(location, relative_model_path, run_name, slice_thickness=
     inferer = monai.inferers.SlidingWindowInferer(
         roi_size=roi,
         sw_batch_size=2,
-        overlap=0.5,
+        overlap=0.7,
         sw_device=device,
         device="cpu",
-        progress=True
+        progress=False
     )
 
     for item in tqdm(dataloader, position=0):

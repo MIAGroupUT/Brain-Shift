@@ -10,7 +10,7 @@ import shutil
 import torch
 
 
-def infer_centered(run_name, location, read_location):
+def infer_centered(run_name, location, read_location, slice_thickness='small'):
     print(f"Started optimizing centers with the run name: {run_name}")
 
     save_location = f"{location}/outputs/inferred/centering/{run_name}"
@@ -22,7 +22,7 @@ def infer_centered(run_name, location, read_location):
         os.mkdir(path=save_location)
 
     print("Loading data_loading")
-    dataset = AllBidsDataset(f"{location}/data", slice_thickness='small', caching=False)
+    dataset = AllBidsDataset(f"{location}/data", slice_thickness=slice_thickness, caching=False)
 
     dataloader = DataLoader(dataset, batch_size=1, shuffle=True)
 
