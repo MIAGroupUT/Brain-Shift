@@ -57,7 +57,7 @@ def vis_to_wandb_segmentation(img, output, mask, names, loss, epoch, save=False,
         plt.close(fig)
 
 
-def vis_to_wandb_segmentation_3d(img, output, mask, names, loss, epoch, save=False, save_path=None):
+def vis_to_wandb_segmentation_3d(img, output, mask, names, loss, epoch, save=False, save_path=None, use_wandb=True):
     with torch.no_grad():
         # Get the predicted masks from the output logits
         _, predicted_masks = torch.max(output, dim=1)
@@ -109,7 +109,10 @@ def vis_to_wandb_segmentation_3d(img, output, mask, names, loss, epoch, save=Fal
             assert save_path is not None
             plt.savefig(f'{save_path}/{epoch}.png', dpi=200)
 
-        wandb.log({"plot": fig})
+        if use_wandb:
+            wandb.log({"plot": fig})
+        else:
+            plt.imshow()
         plt.close(fig)
 
 
