@@ -46,7 +46,6 @@ def train_morph(run_name, num_epochs, location, location_centers, batch_size=1, 
             names = d['name']
             optimizer.zero_grad()
             img = d['ct'].to(device)
-            mask = d['annotation'].to(device)
 
             out = model(img)
             out = torch.nn.Softmax(dim=1)(out)
