@@ -8,4 +8,5 @@ notebooks
 .idea
 .vscode
 scripts/err.err
+scripts/err_main.err
 scripts/main_output.log

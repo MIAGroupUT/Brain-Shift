@@ -219,8 +219,9 @@ class SliceDataset(Dataset):
 
 
 class Dataset3D(Dataset):
-    def __init__(self, base_dataset):
+    def __init__(self, base_dataset, random=True):
         self.base_dataset = base_dataset
+        self.random = random
 
     def __len__(self):
         return len(self.base_dataset)
@@ -228,7 +229,7 @@ class Dataset3D(Dataset):
     def __getitem__(self, idx):
         # Load the full 3D volume using the base dataset
         data = self.base_dataset[idx]
-
-        data = random_transform_3d(data)
+        if self.random:
+            data = random_transform_3d(data)
 
         return data
