@@ -1,6 +1,6 @@
 import torch
 import monai
-from src.data_loading.datasets import AllBidsDataset, SliceDataset, Dataset3D
+from src.data_loading.datasets import AllBidsDataset, SliceDataset, Dataset3D, NiftiDataset
 from monai.data import DataLoader
 from src.utils.brain_visualization import vis_to_wandb_segmentation, vis_to_wandb_segmentation_3d
 from tqdm import tqdm
@@ -9,6 +9,7 @@ import shutil
 import nibabel
 import numpy as np
 import h5py
+from src.utils.skull_stripping import skull_mask
 
 
 def add_result_to_hdf5(d, h5_file):
@@ -21,7 +22,7 @@ def add_result_to_hdf5(d, h5_file):
             subj_group.create_dataset(k, data=v.numpy())
 
 
-def infer_segmentation(location, relative_model_path, run_name, slice_thickness="large", device="cuda", make_hdf5=False):
+def infer_segmentation(location, relative_model_path, run_name, slice_thickness="large", device="cuda", make_hdf5=False, use_nifti=False, nifti_location="", do_skull_strip=False):
 
     out_dir = f"{location}/outputs/inferred/segmentation/{run_name}"
     try:
@@ -35,10 +36,16 @@ def infer_segmentation(location, relative_model_path, run_name, slice_thickness=
 
     hdf5_file = None
     if make_hdf5:
-        hdf5_file = h5py.File(f'{run_name}.hdf5', 'w')
+        hdf5_file = f'{out_dir}/{run_name}.hdf5'
+        open_file = h5py.File(hdf5_file, 'w')
+
 
     # Load the data
     dataset = AllBidsDataset(f"{location}/data", slice_thickness=slice_thickness, exclude_registered=False)
+    if use_nifti:
+        dataset_nifti = NiftiDataset(location=f"{location}/{nifti_location}", caching=False)
+        dataset = Dataset3D(dataset_nifti, random=False)
+
     dataloader = DataLoader(dataset, batch_size=1, shuffle=True)
 
     roi = (256, 256, 32)
@@ -56,7 +63,7 @@ def infer_segmentation(location, relative_model_path, run_name, slice_thickness=
 
     inferer = monai.inferers.SlidingWindowInferer(
         roi_size=roi,
-        sw_batch_size=1,
+        sw_batch_size=2,
         overlap=0.7,
         sw_device=device,
         device="cpu",
@@ -85,7 +92,9 @@ def infer_segmentation(location, relative_model_path, run_name, slice_thickness=
                 'name': name
             }
 
-            torch.save(d, f"{out_dir}/tensors/{name}.pt")
+            if do_skull_strip:
+                skull = skull_mask(brain)[0]
+                d['skull'] = skull
 
             if make_hdf5:
                 add_result_to_hdf5(d, hdf5_file)

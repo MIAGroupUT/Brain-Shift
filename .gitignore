@@ -9,4 +9,5 @@ notebooks
 .vscode
 scripts/err_main1.err
 scripts/err.err
+scripts/err_main.err
 scripts/main_output.log
