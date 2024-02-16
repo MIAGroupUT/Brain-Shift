@@ -1,3 +1,5 @@
+import os
+
 from torch.utils.data import Dataset
 import nibabel as nib
 from glob import glob
@@ -167,6 +169,39 @@ class AllBidsDataset(Dataset):
             )
 
 
+class NiftiDataset(Dataset):
+
+    def __init__(self, location, caching=False):
+        super().__init__()
+        self.files = os.listdir(location)
+        self.location = location
+        self.caching = caching
+        self.cache = {}
+
+    def __len__(self):
+        return len(self.files)
+
+    def __getitem__(self, idx):
+
+        if self.caching and idx in self.cache:
+            return self.cache[idx]
+
+        img = nib.load(os.path.join(self.location, self.files[idx]))
+        affine = img.affine
+        img = img.get_fdata()
+
+        d = {
+            'ct': img,
+            'affine': affine,
+            'name': self.files[idx]
+        }
+
+        if self.caching:
+            self.cache[idx] = d
+
+        return d
+
+
 class SliceDataset(Dataset):
     def __init__(self, base_dataset):
         self.base_dataset = base_dataset
@@ -197,5 +232,3 @@ class Dataset3D(Dataset):
         data = random_transform_3d(data)
 
         return data
-
-

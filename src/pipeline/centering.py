@@ -35,7 +35,7 @@ def infer_centered(run_name, location, read_location, slice_thickness='small'):
         items = np.load(f"{location}/outputs/centering/{read_location}/rotations/{name}.npy")
         print(name, items)
 
-        t = translate_and_rotate(img, torch.tensor([items[0, 0]]).to("cuda"), torch.tensor([items[1, 0]]).to("cuda"), torch.tensor([0.001]).to("cuda"), torch.tensor([items[2, 0]]).to("cuda"))
+        t = translate_and_rotate(img, torch.tensor([items[0, 0]]).to("cuda"), torch.tensor([items[1, 0]]).to("cuda"), torch.tensor([items[2, 0]]).to("cuda"), torch.tensor([items[3, 0]]).to("cuda"))
         detailed_plot_from3d(t, save=False, save_location=f"{save_location}/visuals",
                              name=name, use_wandb=True)
 

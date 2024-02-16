@@ -8,9 +8,20 @@ import os
 import shutil
 import nibabel
 import numpy as np
+import h5py
 
 
-def infer_segmentation(location, relative_model_path, run_name, slice_thickness="large", device="cuda"):
+def add_result_to_hdf5(d, h5_file):
+    with h5py.File(h5_file, 'a') as hf:
+        subj_group = hf.create_group(d['name'])
+        for k, v in d.items():
+
+            if k == 'name':
+                continue
+            subj_group.create_dataset(k, data=v.numpy())
+
+
+def infer_segmentation(location, relative_model_path, run_name, slice_thickness="large", device="cuda", make_hdf5=False):
 
     out_dir = f"{location}/outputs/inferred/segmentation/{run_name}"
     try:
@@ -21,6 +32,10 @@ def infer_segmentation(location, relative_model_path, run_name, slice_thickness=
     os.mkdir(path=f"{out_dir}/visuals")
     os.mkdir(path=f"{out_dir}/out")
     os.mkdir(path=f"{out_dir}/tensors")
+
+    hdf5_file = None
+    if make_hdf5:
+        hdf5_file = h5py.File(f'{run_name}.hdf5', 'w')
 
     # Load the data
     dataset = AllBidsDataset(f"{location}/data", slice_thickness=slice_thickness, exclude_registered=False)
@@ -41,7 +56,7 @@ def infer_segmentation(location, relative_model_path, run_name, slice_thickness=
 
     inferer = monai.inferers.SlidingWindowInferer(
         roi_size=roi,
-        sw_batch_size=2,
+        sw_batch_size=1,
         overlap=0.7,
         sw_device=device,
         device="cpu",
@@ -71,4 +86,7 @@ def infer_segmentation(location, relative_model_path, run_name, slice_thickness=
             }
 
             torch.save(d, f"{out_dir}/tensors/{name}.pt")
+
+            if make_hdf5:
+                add_result_to_hdf5(d, hdf5_file)
 
