@@ -5,7 +5,7 @@
 #SBATCH -c 16
 #SBATCH --time=24:00:00
 #SBATCH --partition=mia,am
-#SBATCH --error=/home/imreb/brain-morphing/scripts/err_main.err
+#SBATCH --error=/home/imreb/brain-morphing/scripts/err_main1.err
 
 cd /home/imreb/brain-morphing
 

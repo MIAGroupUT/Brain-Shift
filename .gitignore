@@ -7,5 +7,6 @@ notebooks
 **/.ipynb_checkpoints
 .idea
 .vscode
+scripts/err_main1.err
 scripts/err.err
 scripts/main_output.log

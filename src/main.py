@@ -6,12 +6,12 @@ import wandb
 if __name__ == '__main__':
 
 
-    run_name = "seg_flips_withrots"
+    run_name = "seg_noflip_norot"
     # location = "/home/baris/Documents/brain-morphing"
     location = "/home/imreb/brain-morphing"
     # location = "/home/baris/Documents/work/brain-morphing"
 
-    wandb.init(project="debug",
+    wandb.init(project="annotations",
                entity="barisimre",
                name=run_name)
 
