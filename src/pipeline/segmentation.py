@@ -41,7 +41,7 @@ def infer_segmentation(location, relative_model_path, run_name, slice_thickness=
 
 
     # Load the data
-    dataset = AllBidsDataset(f"{location}/data", slice_thickness=slice_thickness, exclude_registered=False)
+    dataset = AllBidsDataset(f"{location}/data/bids", slice_thickness=slice_thickness, exclude_registered=False)
     if use_nifti:
         dataset_nifti = NiftiDataset(location=f"{location}/{nifti_location}", caching=False)
         dataset = Dataset3D(dataset_nifti, random=False)
@@ -72,7 +72,7 @@ def infer_segmentation(location, relative_model_path, run_name, slice_thickness=
 
     for item in tqdm(dataloader, position=0):
 
-        brain = item['ct'].unsqueeze(dim=0)
+        brain = item['ct'].unsqueeze(dim=0).float()
         name = item['name'][0]
         affine = item['affine'][0]
         with torch.no_grad():
@@ -83,10 +83,10 @@ def infer_segmentation(location, relative_model_path, run_name, slice_thickness=
             o = nibabel.Nifti1Image(np.argmax(output.detach().cpu().numpy()[0], axis=0).astype(float), affine)
 
             nibabel.save(b, f"{out_dir}/out/{name}")
-            nibabel.save(o, f"{out_dir}/out/{name}_mask")
+            nibabel.save(o, f"{out_dir}/out/mask_{name}")
 
             d = {
-                'img': brain,
+                'ct': brain,
                 'annotation': output,
                 'affine': affine,
                 'name': name

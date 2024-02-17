@@ -7,9 +7,9 @@ import wandb
 if __name__ == '__main__':
 
 
-    run_name = "infer_new_centers"
-    location = "/home/baris/Documents/brain-morphing"
-    # location = "/home/imreb/brain-morphing"
+    run_name = "test_h5py"
+    # location = "/home/baris/Documents/brain-morphing"
+    location = "/home/imreb/brain-morphing"
     # location = "/home/baris/Documents/work/brain-morphing"
 
     wandb.init(project="debug",
@@ -20,4 +20,4 @@ if __name__ == '__main__':
     # optimize_centers(location=location, run_name=run_name, batch_size=1, num_epochs=75)
     # infer_centered(location=location, run_name="infer_new_centers", read_location="centers_fixed_large", slice_thickness="large")
     #
-    infer_segmentation(location=location, relative_model_path="/segmentation_3d_rotatefirst/weights/800.pt", run_name=run_name, slice_thickness="large", use_nifti=True, nifti_location='/data/centered', make_hdf5=True)
+    infer_segmentation(location=location, relative_model_path="/segmentation_3d_rotatefirst/weights/800.pt", run_name=run_name, slice_thickness="large", use_nifti=True, nifti_location='/data/centered', make_hdf5=True, do_skull_strip=True)
