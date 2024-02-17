@@ -47,8 +47,11 @@ class FlipAndSwapLabels(MapTransform):
         # Randomly decide whether to apply the transform
         apply_transform = np.random.rand() < self.prob
 
+        print(data)
+
         if not apply_transform:
             return data
+
 
         # Flip the img itself
         data[self.img_key] = torch.flip(data[self.img_key], dims=[-2])
@@ -75,10 +78,10 @@ random_transform_2d = monai.transforms.Compose([
 ])
 
 random_transform_3d = monai.transforms.Compose([
-    monai.transforms.RandRotated(keys=['ct', 'annotation'], range_z=2, prob=0.5, padding_mode="zeros",
-                                 align_corners=True),
+    # monai.transforms.RandRotated(keys=['ct', 'annotation'], range_z=2, prob=0.5, padding_mode="zeros",
+    #                              align_corners=True),
+    FlipAndSwapLabels(keys=['ct', 'annotation']),
     monai.transforms.RandCropByPosNegLabeld(keys=['ct', 'annotation'], spatial_size=(256, 256, 32),
                                             label_key='annotation', num_samples=1, pos=1),
-    FlipAndSwapLabels(keys=['ct', 'annotation'])
 
 ])

@@ -7,6 +7,7 @@ from os import path
 import numpy as np
 import torch
 from src.data_loading.transforms import *
+import h5py
 
 
 def add_background_channel(annotations):
@@ -191,8 +192,8 @@ class NiftiDataset(Dataset):
         img = img.get_fdata()
 
         d = {
-            'ct': img,
-            'affine': affine,
+            'ct': torch.from_numpy(img),
+            'affine': torch.from_numpy(affine),
             'name': self.files[idx]
         }
 
@@ -200,6 +201,31 @@ class NiftiDataset(Dataset):
             self.cache[idx] = d
 
         return d
+
+
+class HDF5Dataset(Dataset):
+    def __init__(self, hdf5_filename):
+        self.hdf5_filename = hdf5_filename
+        # Open the file in read-only mode
+        self.hdf5_file = h5py.File(hdf5_filename, 'r')
+        # List of subject IDs
+        self.subject_ids = list(self.hdf5_file.keys())
+
+    def __len__(self):
+        return len(self.subject_ids)
+
+    def __getitem__(self, idx):
+        subject_id = self.subject_ids[idx]
+        subject_data = self.hdf5_file[subject_id]
+        # Load data into tensors
+        img = torch.from_numpy(subject_data['ct'][:])
+        segmentation = torch.from_numpy(subject_data['annotation'][:])
+        affine = torch.from_numpy(subject_data['affine'][:])
+        skull = torch.from_numpy(subject_data['skull'][:])
+        return {'name': subject_id, 'img': img, 'annotation': segmentation, 'affine': affine, 'skull': skull}
+
+    def close(self):
+        self.hdf5_file.close()
 
 
 class SliceDataset(Dataset):

@@ -1,6 +1,6 @@
 import torch
 import monai
-from src.data_loading.datasets import AnnotatedBidsDataset, SliceDataset, Dataset3D
+from src.data_loading.datasets import AnnotatedBidsDataset, SliceDataset, Dataset3D, NiftiDataset
 from monai.data import DataLoader
 import wandb
 from src.utils.brain_visualization import vis_to_wandb_segmentation, vis_to_wandb_segmentation_3d
@@ -40,7 +40,7 @@ def train_segmentation(run_name, location, batch_size, num_epochs=1000, slice_th
         ).to(device)
 
     if dims == 3:
-        dataset_3d = Dataset3D(dataset)
+        dataset_3d = Dataset3D(dataset, random=True)
         dataloader = DataLoader(dataset_3d, batch_size=batch_size, shuffle=True)
 
         model = monai.networks.nets.SwinUNETR(
@@ -54,7 +54,7 @@ def train_segmentation(run_name, location, batch_size, num_epochs=1000, slice_th
     optimizer = torch.optim.Adam(model.parameters(), lr=lr)
     scheduler = torch.optim.lr_scheduler.ExponentialLR(optimizer, gamma=0.9993)
     loss_fn = monai.losses.DiceLoss()
-    
+
     model.train()
 
     for epoch in tqdm(range(num_epochs)):
@@ -74,15 +74,13 @@ def train_segmentation(run_name, location, batch_size, num_epochs=1000, slice_th
             optimizer.step()
             wandb.log({"training_loss": loss.item()})
 
-        if epoch % 20 == 0:
-
+        if epoch % 50 == 0:
             vis_to_wandb_segmentation(img, out, mask, names, loss.item(), epoch=epoch, save=True,
                                       save_path=f"{out_dir}/visuals") if dims == 2 else vis_to_wandb_segmentation_3d(
                 img, out, mask, names, loss.item(), epoch=epoch, save=True,
                 save_path=f"{out_dir}/visuals")
-            
+
         if epoch % 200 == 0:
             torch.save(model.state_dict(), f"{out_dir}/weights/{epoch}.pt")
-
 
         scheduler.step()
