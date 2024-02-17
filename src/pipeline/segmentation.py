@@ -72,7 +72,7 @@ def infer_segmentation(location, relative_model_path, run_name, slice_thickness=
 
             b = nibabel.Nifti1Image(brain.detach().cpu().numpy()[0, 0], affine)
             o = nibabel.Nifti1Image(np.argmax(output.detach().cpu().numpy()[0], axis=0).astype(float), affine)
-git 
+
             nibabel.save(b, f"{out_dir}/out/{name}")
             nibabel.save(o, f"{out_dir}/out/mask_{name}")
 
