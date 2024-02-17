@@ -6,7 +6,7 @@
 #SBATCH --time=24:00:00
 #SBATCH --partition=mia,am
 #SBATCH --error=/home/imreb/brain-morphing/scripts/err_main1.err
-
+#SBATCH --nodelist=ctit094
 cd /home/imreb/brain-morphing
 
 export HTTPS_PROXY=http://proxy.utwente.nl:3128

@@ -1,0 +1,38 @@
+Traceback (most recent call last):
+  File "/home/imreb/.conda/envs/brain-shift/lib/python3.10/runpy.py", line 196, in _run_module_as_main
+    return _run_code(code, main_globals, None,
+  File "/home/imreb/.conda/envs/brain-shift/lib/python3.10/runpy.py", line 86, in _run_code
+    exec(code, run_globals)
+  File "/home/imreb/brain-morphing/src/infer.py", line 15, in <module>
+    wandb.init(project="debug",
+  File "/home/imreb/.conda/envs/brain-shift/lib/python3.10/site-packages/wandb/sdk/wandb_init.py", line 1195, in init
+    raise e
+  File "/home/imreb/.conda/envs/brain-shift/lib/python3.10/site-packages/wandb/sdk/wandb_init.py", line 1172, in init
+    wi.setup(kwargs)
+  File "/home/imreb/.conda/envs/brain-shift/lib/python3.10/site-packages/wandb/sdk/wandb_init.py", line 189, in setup
+    self._wl = wandb_setup.setup(settings=setup_settings)
+  File "/home/imreb/.conda/envs/brain-shift/lib/python3.10/site-packages/wandb/sdk/wandb_setup.py", line 327, in setup
+    ret = _setup(settings=settings)
+  File "/home/imreb/.conda/envs/brain-shift/lib/python3.10/site-packages/wandb/sdk/wandb_setup.py", line 320, in _setup
+    wl = _WandbSetup(settings=settings)
+  File "/home/imreb/.conda/envs/brain-shift/lib/python3.10/site-packages/wandb/sdk/wandb_setup.py", line 303, in __init__
+    _WandbSetup._instance = _WandbSetup__WandbSetup(settings=settings, pid=pid)
+  File "/home/imreb/.conda/envs/brain-shift/lib/python3.10/site-packages/wandb/sdk/wandb_setup.py", line 114, in __init__
+    self._setup()
+  File "/home/imreb/.conda/envs/brain-shift/lib/python3.10/site-packages/wandb/sdk/wandb_setup.py", line 250, in _setup
+    self._setup_manager()
+  File "/home/imreb/.conda/envs/brain-shift/lib/python3.10/site-packages/wandb/sdk/wandb_setup.py", line 277, in _setup_manager
+    self._manager = wandb_manager._Manager(settings=self._settings)
+  File "/home/imreb/.conda/envs/brain-shift/lib/python3.10/site-packages/wandb/sdk/wandb_manager.py", line 139, in __init__
+    self._service.start()
+  File "/home/imreb/.conda/envs/brain-shift/lib/python3.10/site-packages/wandb/sdk/service/service.py", line 237, in start
+    self._launch_server()
+  File "/home/imreb/.conda/envs/brain-shift/lib/python3.10/site-packages/wandb/sdk/service/service.py", line 231, in _launch_server
+    _sentry.reraise(e)
+  File "/home/imreb/.conda/envs/brain-shift/lib/python3.10/site-packages/wandb/analytics/sentry.py", line 154, in reraise
+    raise exc.with_traceback(sys.exc_info()[2])
+  File "/home/imreb/.conda/envs/brain-shift/lib/python3.10/site-packages/wandb/sdk/service/service.py", line 229, in _launch_server
+    self._wait_for_ports(fname, proc=internal_proc)
+  File "/home/imreb/.conda/envs/brain-shift/lib/python3.10/site-packages/wandb/sdk/service/service.py", line 131, in _wait_for_ports
+    raise ServiceStartTimeoutError(
+wandb.sdk.service.service.ServiceStartTimeoutError: Timed out waiting for wandb service to start after 30.0 seconds. Try increasing the timeout with the `_service_wait` setting.
