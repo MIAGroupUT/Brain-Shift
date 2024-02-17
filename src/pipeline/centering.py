@@ -16,14 +16,14 @@ def infer_centered(run_name, location, read_location, slice_thickness='small', d
 
     save_location = f"{location}/outputs/inferred/centering/{run_name}"
 
-    hdf5_file = f'{save_location}/{run_name}.hdf5'
-    open_file = h5py.File(hdf5_file, 'w')
-
     try:
         os.mkdir(path=save_location)
     except FileExistsError:
         shutil.rmtree(save_location, ignore_errors=True)
         os.mkdir(path=save_location)
+
+    hdf5_file = f'{save_location}/{run_name}.hdf5'
+    open_file = h5py.File(hdf5_file, 'w')
 
     print("Loading data_loading")
     if do_annotations:
