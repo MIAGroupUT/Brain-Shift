@@ -6,15 +6,16 @@ import wandb
 if __name__ == '__main__':
 
 
-    run_name = "seg_yesflip_norot_5000"
+    # run_name = "seg_yesflip_norot_5000"
+    run_name = 'large_centers_annotated'
     # location = "/home/baris/Documents/brain-morphing"
-    # location = "/home/imreb/brain-morphing"
-    location = "/home/baris/Documents/work/brain-morphing"
+    location = "/home/imreb/brain-morphing"
+    # location = "/home/baris/Documents/work/brain-morphing"
 
-    wandb.init(project="annotations",
+    wandb.init(project="centering",
                entity="barisimre",
                name=run_name)
 
-    train_segmentation(batch_size=2, run_name=run_name, location=location, slice_thickness="large", dims=3, num_epochs=5000)
-    # optimize_centers(location=location, run_name=run_name, batch_size=1, num_epochs=200, slice_thickness='large')
+    # train_segmentation(batch_size=2, run_name=run_name, location=location, slice_thickness="large", dims=3, num_epochs=5000)
+    optimize_centers(location=location, run_name=run_name, batch_size=1, num_epochs=200, slice_thickness='large')
 

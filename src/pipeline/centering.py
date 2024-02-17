@@ -27,9 +27,9 @@ def infer_centered(run_name, location, read_location, slice_thickness='small', d
 
     print("Loading data_loading")
     if do_annotations:
-        dataset = AnnotatedBidsDataset(f"{location}/data", slice_thickness=slice_thickness, caching=False)
+        dataset = AnnotatedBidsDataset(f"{location}/data/bids", slice_thickness=slice_thickness, caching=False)
     else:
-        dataset = AllBidsDataset(f"{location}/data", slice_thickness=slice_thickness, caching=False)
+        dataset = AllBidsDataset(f"{location}/data/bids", slice_thickness=slice_thickness, caching=False)
 
     dataloader = DataLoader(dataset, batch_size=1, shuffle=True)
 
@@ -48,7 +48,7 @@ def infer_centered(run_name, location, read_location, slice_thickness='small', d
                              name=name, use_wandb=True)
 
         d = {
-            'ct': t,
+            'ct': t[0],
             'affine': affine,
             'name': name
         }
