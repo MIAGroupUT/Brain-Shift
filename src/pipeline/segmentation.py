@@ -10,16 +10,7 @@ import nibabel
 import numpy as np
 import h5py
 from src.utils.skull_stripping import skull_mask
-
-
-def add_result_to_hdf5(d, h5_file):
-    with h5py.File(h5_file, 'a') as hf:
-        subj_group = hf.create_group(d['name'])
-        for k, v in d.items():
-
-            if k == 'name':
-                continue
-            subj_group.create_dataset(k, data=v.numpy())
+from src.utils.general import add_result_to_hdf5
 
 
 def infer_segmentation(location, relative_model_path, run_name, slice_thickness="large", device="cuda", make_hdf5=False, use_nifti=False, nifti_location="", do_skull_strip=False):

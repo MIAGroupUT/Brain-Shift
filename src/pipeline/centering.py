@@ -1,5 +1,5 @@
 from torch.utils.data import DataLoader
-from src.data_loading.datasets import AllBidsDataset
+from src.data_loading.datasets import AllBidsDataset, AnnotatedBidsDataset
 from src.utils.movement import translate_and_rotate
 from src.utils.general import *
 from tqdm import tqdm
@@ -8,12 +8,16 @@ import os
 import nibabel
 import shutil
 import torch
+from src.utils.general import add_result_to_hdf5
 
 
-def infer_centered(run_name, location, read_location, slice_thickness='small'):
+def infer_centered(run_name, location, read_location, slice_thickness='small', do_annotations=False):
     print(f"Started optimizing centers with the run name: {run_name}")
 
     save_location = f"{location}/outputs/inferred/centering/{run_name}"
+
+    hdf5_file = f'{save_location}/{run_name}.hdf5'
+    open_file = h5py.File(hdf5_file, 'w')
 
     try:
         os.mkdir(path=save_location)
@@ -22,7 +26,10 @@ def infer_centered(run_name, location, read_location, slice_thickness='small'):
         os.mkdir(path=save_location)
 
     print("Loading data_loading")
-    dataset = AllBidsDataset(f"{location}/data", slice_thickness=slice_thickness, caching=False)
+    if do_annotations:
+        dataset = AnnotatedBidsDataset(f"{location}/data", slice_thickness=slice_thickness, caching=False)
+    else:
+        dataset = AllBidsDataset(f"{location}/data", slice_thickness=slice_thickness, caching=False)
 
     dataloader = DataLoader(dataset, batch_size=1, shuffle=True)
 
@@ -35,10 +42,28 @@ def infer_centered(run_name, location, read_location, slice_thickness='small'):
         items = np.load(f"{location}/outputs/centering/{read_location}/rotations/{name}.npy")
         print(name, items)
 
-        t = translate_and_rotate(img, torch.tensor([items[0, 0]]).to("cuda"), torch.tensor([items[1, 0]]).to("cuda"), torch.tensor([items[2, 0]]).to("cuda"), torch.tensor([items[3, 0]]).to("cuda"))
+        t = translate_and_rotate(img, torch.tensor([items[0, 0]]).to("cuda"), torch.tensor([items[1, 0]]).to("cuda"),
+                                 torch.tensor([items[2, 0]]).to("cuda"), torch.tensor([items[3, 0]]).to("cuda"))
         detailed_plot_from3d(t, save=False, save_location=f"{save_location}/visuals",
                              name=name, use_wandb=True)
 
-        b = nibabel.Nifti1Image(t.detach().cpu().numpy()[0, 0], affine)
-        nibabel.save(b, f"{save_location}/{name}")
+        d = {
+            'ct': t,
+            'affine': affine,
+            'name': name
+        }
 
+        if do_annotations:
+            mask = brain['annotation']
+            m_t = translate_and_rotate(mask, torch.tensor([items[0, 0]]).to("cuda"),
+                                       torch.tensor([items[1, 0]]).to("cuda"), torch.tensor([items[2, 0]]).to("cuda"),
+                                       torch.tensor([items[3, 0]]).to("cuda"))
+
+            d['annotation'] = m_t
+
+        add_result_to_hdf5(d, hdf5_file)
+
+
+
+        # b = nibabel.Nifti1Image(t.detach().cpu().numpy()[0, 0], affine)
+        # nibabel.save(b, f"{save_location}/{name}")
