@@ -1,6 +1,6 @@
 import torch
 import monai
-from src.data_loading.datasets import AllBidsDataset, SliceDataset, Dataset3D, NiftiDataset
+from src.data_loading.datasets import AllBidsDataset, SliceDataset, Dataset3D, NiftiDataset, HDF5Dataset
 from monai.data import DataLoader
 from src.utils.brain_visualization import vis_to_wandb_segmentation, vis_to_wandb_segmentation_3d
 from tqdm import tqdm
@@ -14,7 +14,7 @@ from src.utils.general import add_result_to_hdf5
 
 
 def infer_segmentation(location, relative_model_path, run_name, slice_thickness="large", device="cuda", make_hdf5=False,
-                       use_nifti=False, nifti_location="", do_skull_strip=False):
+                       use_nifti=False, nifti_location="", do_skull_strip=False, hdf5_location=None):
     out_dir = f"{location}/outputs/inferred/segmentation/{run_name}"
     try:
         os.mkdir(path=out_dir)
@@ -31,6 +31,9 @@ def infer_segmentation(location, relative_model_path, run_name, slice_thickness=
         open_file = h5py.File(hdf5_file, 'w')
 
     # Load the data
+    if hdf5_location is not None:
+        dataset = HDF5Dataset(hdf5_filename=hdf5_location, with_skulls=False, with_annotations=False)
+
     dataset = AllBidsDataset(f"{location}/data/bids", slice_thickness=slice_thickness, exclude_registered=False)
     if use_nifti:
         dataset_nifti = NiftiDataset(location=f"{location}/{nifti_location}", caching=False)
