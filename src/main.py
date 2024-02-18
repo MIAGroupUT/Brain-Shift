@@ -16,6 +16,6 @@ if __name__ == '__main__':
                entity="barisimre",
                name=run_name)
 
-    # train_segmentation(batch_size=2, run_name=run_name, location=location, slice_thickness="large", dims=3, num_epochs=5000)
-    optimize_centers(location=location, run_name=run_name, batch_size=1, num_epochs=200, slice_thickness='large')
+    train_segmentation(batch_size=2, run_name=run_name, location=location, slice_thickness="large", dims=3, num_epochs=5000, loader_num_workers=4)
+    # optimize_centers(location=location, run_name=run_name, batch_size=1, num_epochs=200, slice_thickness='large')
 

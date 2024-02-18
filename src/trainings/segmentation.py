@@ -1,6 +1,6 @@
 import torch
 import monai
-from src.data_loading.datasets import AnnotatedBidsDataset, SliceDataset, Dataset3D, NiftiDataset
+from src.data_loading.datasets import AnnotatedBidsDataset, SliceDataset, Dataset3D, HDF5Dataset
 from monai.data import DataLoader
 import wandb
 from src.utils.brain_visualization import vis_to_wandb_segmentation, vis_to_wandb_segmentation_3d
@@ -10,7 +10,7 @@ import shutil
 
 
 def train_segmentation(run_name, location, batch_size, num_epochs=1000, slice_thickness='small', lr=3e-4, device="cuda",
-                       dims=2):
+                       dims=2, loader_num_workers=1):
     out_dir = f"{location}/outputs/{run_name}"
     try:
         os.mkdir(path=out_dir)
@@ -23,7 +23,9 @@ def train_segmentation(run_name, location, batch_size, num_epochs=1000, slice_th
 
     print("Loading data_loading")
 
-    dataset = AnnotatedBidsDataset(f"{location}/data", slice_thickness=slice_thickness)
+    # dataset = AnnotatedBidsDataset(f"{location}/data", slice_thickness=slice_thickness)
+    filename = f"{location}/data/morning_centers_infer.hdf5"
+    dataset = HDF5Dataset(hdf5_filename=filename, with_skulls=False)
     dataloader = None
     model = None
 
@@ -41,7 +43,7 @@ def train_segmentation(run_name, location, batch_size, num_epochs=1000, slice_th
 
     if dims == 3:
         dataset_3d = Dataset3D(dataset, random=True)
-        dataloader = DataLoader(dataset_3d, batch_size=batch_size, shuffle=True)
+        dataloader = DataLoader(dataset_3d, batch_size=batch_size, shuffle=True, num_workers=loader_num_workers)
 
         model = monai.networks.nets.SwinUNETR(
             img_size=(256, 256, 32),

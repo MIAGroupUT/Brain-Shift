@@ -47,8 +47,6 @@ class FlipAndSwapLabels(MapTransform):
         # Randomly decide whether to apply the transform
         apply_transform = np.random.rand() < self.prob
 
-        print(data)
-
         if not apply_transform:
             return data
 

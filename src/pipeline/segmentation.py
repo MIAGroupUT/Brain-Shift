@@ -13,8 +13,8 @@ from src.utils.skull_stripping import skull_mask
 from src.utils.general import add_result_to_hdf5
 
 
-def infer_segmentation(location, relative_model_path, run_name, slice_thickness="large", device="cuda", make_hdf5=False, use_nifti=False, nifti_location="", do_skull_strip=False):
-
+def infer_segmentation(location, relative_model_path, run_name, slice_thickness="large", device="cuda", make_hdf5=False,
+                       use_nifti=False, nifti_location="", do_skull_strip=False):
     out_dir = f"{location}/outputs/inferred/segmentation/{run_name}"
     try:
         os.mkdir(path=out_dir)
@@ -29,7 +29,6 @@ def infer_segmentation(location, relative_model_path, run_name, slice_thickness=
     if make_hdf5:
         hdf5_file = f'{out_dir}/{run_name}.hdf5'
         open_file = h5py.File(hdf5_file, 'w')
-
 
     # Load the data
     dataset = AllBidsDataset(f"{location}/data/bids", slice_thickness=slice_thickness, exclude_registered=False)
@@ -69,9 +68,10 @@ def infer_segmentation(location, relative_model_path, run_name, slice_thickness=
         with torch.no_grad():
 
             output = inferer(inputs=brain, network=model)
+            output = torch.argmax(output, dim=1).float()
 
             b = nibabel.Nifti1Image(brain.detach().cpu().numpy()[0, 0], affine)
-            o = nibabel.Nifti1Image(np.argmax(output.detach().cpu().numpy()[0], axis=0).astype(float), affine)
+            o = nibabel.Nifti1Image(output.detach().cpu().numpy()[0].astype(float), affine)
 
             nibabel.save(b, f"{out_dir}/out/{name}")
             nibabel.save(o, f"{out_dir}/out/mask_{name}")
@@ -89,4 +89,3 @@ def infer_segmentation(location, relative_model_path, run_name, slice_thickness=
 
             if make_hdf5:
                 add_result_to_hdf5(d, hdf5_file)
-

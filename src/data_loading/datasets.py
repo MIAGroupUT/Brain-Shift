@@ -204,12 +204,13 @@ class NiftiDataset(Dataset):
 
 
 class HDF5Dataset(Dataset):
-    def __init__(self, hdf5_filename):
+    def __init__(self, hdf5_filename, with_skulls=False):
         self.hdf5_filename = hdf5_filename
         # Open the file in read-only mode
         self.hdf5_file = h5py.File(hdf5_filename, 'r')
         # List of subject IDs
         self.subject_ids = list(self.hdf5_file.keys())
+        self.with_skulls = with_skulls
 
     def __len__(self):
         return len(self.subject_ids)
@@ -218,11 +219,14 @@ class HDF5Dataset(Dataset):
         subject_id = self.subject_ids[idx]
         subject_data = self.hdf5_file[subject_id]
         # Load data into tensors
-        img = torch.from_numpy(subject_data['ct'][:])
-        segmentation = torch.from_numpy(subject_data['annotation'][:])
+        ct = torch.from_numpy(subject_data['ct'][:])
+        annotation = torch.from_numpy(subject_data['annotation'][:])
         affine = torch.from_numpy(subject_data['affine'][:])
-        skull = torch.from_numpy(subject_data['skull'][:])
-        return {'name': subject_id, 'img': img, 'annotation': segmentation, 'affine': affine, 'skull': skull}
+        if self.with_skulls:
+            skull = torch.from_numpy(subject_data['skull'][:])
+            return {'name': subject_id, 'ct': ct, 'annotation': annotation, 'affine': affine, 'skull': skull}
+        else:
+            return {'name': subject_id, 'ct': ct, 'annotation': annotation}
 
     def close(self):
         self.hdf5_file.close()
