@@ -18,4 +18,4 @@ def add_result_to_hdf5(d, h5_file):
 
             if k == 'name':
                 continue
-            subj_group.create_dataset(k, data=v.numpy())
+            subj_group.create_dataset(k, data=v.detach().cpu().numpy())
