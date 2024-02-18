@@ -1,29 +1,0 @@
-wandb: Currently logged in as: barisimre. Use `wandb login --relogin` to force relogin
-wandb: - Waiting for wandb.init()...wandb: \ Waiting for wandb.init()...wandb: | Waiting for wandb.init()...wandb: / Waiting for wandb.init()...wandb: wandb version 0.16.3 is available!  To upgrade, please run:
-wandb:  $ pip install wandb --upgrade
-wandb: Tracking run with wandb version 0.16.2
-wandb: Run data is saved locally in /home/imreb/brain-morphing/wandb/run-20240217_172318-3e2fq62x
-wandb: Run `wandb offline` to turn off syncing.
-wandb: Syncing run seg_yesflip_norot_5000
-wandb: ⭐️ View project at https://wandb.ai/barisimre/annotations
-wandb: 🚀 View run at https://wandb.ai/barisimre/annotations/runs/3e2fq62x
-Traceback (most recent call last):
-  File "/home/imreb/.conda/envs/brain-shift/lib/python3.10/runpy.py", line 196, in _run_module_as_main
-    return _run_code(code, main_globals, None,
-  File "/home/imreb/.conda/envs/brain-shift/lib/python3.10/runpy.py", line 86, in _run_code
-    exec(code, run_globals)
-  File "/home/imreb/brain-morphing/src/main.py", line 18, in <module>
-    train_segmentation(batch_size=2, run_name=run_name, location=location, slice_thickness="large", dims=3, num_epochs=5000)
-  File "/home/imreb/brain-morphing/src/trainings/segmentation.py", line 44, in train_segmentation
-    dataloader = DataLoader(dataset_3d, batch_size=batch_size, shuffle=True)
-  File "/home/imreb/.conda/envs/brain-shift/lib/python3.10/site-packages/monai/data/dataloader.py", line 106, in __init__
-    super().__init__(dataset=dataset, num_workers=num_workers, **kwargs)
-  File "/home/imreb/.conda/envs/brain-shift/lib/python3.10/site-packages/torch/utils/data/dataloader.py", line 349, in __init__
-    sampler = RandomSampler(dataset, generator=generator)  # type: ignore[arg-type]
-  File "/home/imreb/.conda/envs/brain-shift/lib/python3.10/site-packages/torch/utils/data/sampler.py", line 140, in __init__
-    raise ValueError(f"num_samples should be a positive integer value, but got num_samples={self.num_samples}")
-ValueError: num_samples should be a positive integer value, but got num_samples=0
-wandb: WARNING No program path found, not creating job artifact. See https://docs.wandb.ai/guides/launch/create-job
-wandb: - 0.007 MB of 0.007 MB uploadedwandb: \ 0.013 MB of 0.013 MB uploadedwandb: 🚀 View run seg_yesflip_norot_5000 at: https://wandb.ai/barisimre/annotations/runs/3e2fq62x
-wandb: Synced 6 W&B file(s), 0 media file(s), 0 artifact file(s) and 0 other file(s)
-wandb: Find logs at: ./wandb/run-20240217_172318-3e2fq62x/logs

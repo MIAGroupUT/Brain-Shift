@@ -10,4 +10,6 @@
 cd /home/imreb/brain-morphing
 
 export HTTPS_PROXY=http://proxy.utwente.nl:3128
+export HTTP_PROXY=http://proxy.utwente.nl:3128
+
 python -m src.main
