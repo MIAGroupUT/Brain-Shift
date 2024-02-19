@@ -1,6 +1,6 @@
 from torch.utils.data import DataLoader
 import wandb
-from src.data_loading.datasets import AllBidsDataset, Dataset3D
+from src.data_loading.datasets import AllBidsDataset, Dataset3D, HDF5Dataset
 from src.losses.losses import *
 from src.utils.general import *
 from src.nets.Morph import Morph
@@ -10,10 +10,8 @@ from src.utils.movement import translate_and_rotate
 import os
 import shutil
 
-def load_center_rotate()
 
-
-def train_morph(run_name, num_epochs, location, location_centers, batch_size=1, lr=3e-4):
+def train_morph(run_name, num_epochs, location, data_location, batch_size=1, lr=3e-4):
     print(f"Started morphing things out: {run_name}")
 
     save_location = f"{location}/outputs/morph/{run_name}"
