@@ -82,7 +82,7 @@ def infer_segmentation(location, relative_model_path, run_name, slice_thickness=
             d = {
                 'ct': brain[0],
                 'annotation': output[0],
-                'affine': affine[0],
+                'affine': affine,
                 'name': name
             }
 
