@@ -19,3 +19,25 @@ def add_result_to_hdf5(d, h5_file):
             if k == 'name':
                 continue
             subj_group.create_dataset(k, data=v.detach().cpu().numpy())
+
+
+def check_grad_fn(func, *args, **kwargs):
+    """
+    Checks if the output of the function `func` has a grad_fn, indicating that gradients can be computed.
+
+    Parameters:
+    - func: The function to be checked.
+    - *args: Positional arguments to be passed to the function.
+    - **kwargs: Keyword arguments to be passed to the function.
+
+    Returns:
+    - True if the function's output has a grad_fn and thus supports gradient computation, False otherwise.
+    """
+    # Call the function with the provided arguments
+    output = func(*args, **kwargs)
+
+    # Check if the output has a grad_fn and if it is not None
+    if hasattr(output, 'grad_fn') and output.grad_fn is not None:
+        return True
+    else:
+        return False
