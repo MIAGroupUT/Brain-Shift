@@ -34,7 +34,7 @@ def infer_segmentation(location, relative_model_path, run_name, slice_thickness=
     if hdf5_location is not None:
         dataset = HDF5Dataset(hdf5_filename=hdf5_location, with_skulls=False, with_annotations=False)
 
-    dataset = AllBidsDataset(f"{location}/data/bids", slice_thickness=slice_thickness, exclude_registered=False)
+    # dataset = AllBidsDataset(f"{location}/data/bids", slice_thickness=slice_thickness, exclude_registered=False)
     if use_nifti:
         dataset_nifti = NiftiDataset(location=f"{location}/{nifti_location}", caching=False)
         dataset = Dataset3D(dataset_nifti, random=False)
@@ -65,19 +65,19 @@ def infer_segmentation(location, relative_model_path, run_name, slice_thickness=
 
     for item in tqdm(dataloader, position=0):
 
-        brain = item['ct'].unsqueeze(dim=0).float()
+        brain = item['ct'].float()
         name = item['name'][0]
-        affine = item['affine'][0]
+        affine = item['affine']
         with torch.no_grad():
 
             output = inferer(inputs=brain, network=model)
             output = torch.argmax(output, dim=1).float()
 
-            b = nibabel.Nifti1Image(brain.detach().cpu().numpy()[0, 0], affine)
-            o = nibabel.Nifti1Image(output.detach().cpu().numpy()[0].astype(float), affine)
+            # b = nibabel.Nifti1Image(brain.detach().cpu().numpy()[0, 0], affine)
+            # o = nibabel.Nifti1Image(output.detach().cpu().numpy()[0].astype(float), affine)
 
-            nibabel.save(b, f"{out_dir}/out/{name}")
-            nibabel.save(o, f"{out_dir}/out/mask_{name}")
+            # nibabel.save(b, f"{out_dir}/out/{name}")
+            # nibabel.save(o, f"{out_dir}/out/mask_{name}")
 
             d = {
                 'ct': brain[0],
@@ -88,7 +88,8 @@ def infer_segmentation(location, relative_model_path, run_name, slice_thickness=
 
             if do_skull_strip:
                 skull = skull_mask(brain)[0]
-                d['skull'] = skull
+                d['skull'] = skull.int()
 
             if make_hdf5:
+                print(d.keys())
                 add_result_to_hdf5(d, hdf5_file)
