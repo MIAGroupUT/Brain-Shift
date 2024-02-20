@@ -6,7 +6,7 @@ from src.utils.general import *
 from src.nets.Morph import Morph
 from tqdm import tqdm
 from monai.data import DataLoader
-from src.utils.brain_visualization import detailed_plot_from3d
+from src.utils.brain_visualization import detailed_plot_from3d, detailed_morph
 from src.utils.movement import translate_and_rotate
 import os
 import shutil
@@ -115,8 +115,8 @@ def train_morph(run_name, num_epochs, location, data_location, batch_size=1, num
             wandb.log({"training_loss": loss.item()})
 
         if epoch % 20 == 0:
-            pass
-        #     TODO: make a detailed plt thing with img, morphed and deformation field
+            detailed_morph(img, morphed_image_full, deformation_field, use_wandb=True)
+
 
         if epoch % 200 == 0:
             torch.save(model.state_dict(), f"{save_location}/weights/{epoch}.pt")
