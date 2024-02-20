@@ -116,6 +116,52 @@ def vis_to_wandb_segmentation_3d(img, output, mask, names, loss, epoch, save=Fal
         plt.close(fig)
 
 
+def detailed_morph(img, morphed, d_field, slice=None, line=True, name="unnamed", loss=0.0, save=False, save_location="",
+                   cmap="gray", use_wandb=False):
+    if slice is None:
+        slice_z = int(min(torch.tensor(img.shape[-3:]) / 2))
+        slice_x = int(max(torch.tensor(img.shape[-3:]) / 2))
+    else:
+        slice_z = slice
+        slice_x = slice
+
+    fig, axs = plt.subplots(2, 3, figsize=(15, 10))
+
+    img = img[0, 0].cpu().detach()
+    morphed = morphed[0, 0].cpu().detach()
+    d_field = d_field[0, 0].cpu().detach()
+    d_field = torch.sum(d_field, dim=-1)
+
+    print(img.shape)
+
+    slices_img = [torch.rot90(img[slice_x, :, :]), img[:, :, slice_z]]
+    slices_morphed = [torch.rot90(morphed[slice_x, :, :]), morphed[:, :, slice_z]]
+    slices_deformation = [torch.rot90(d_field[slice_x, :, :]), d_field[:, :, slice_z]]
+
+    axs[1, 0].imshow(slices_img[0])
+    axs[1, 1].imshow(slices_morphed[0])
+    axs[1, 2].imshow(slices_deformation[0])
+
+    axs[0, 0].imshow(slices_img[1])
+    axs[0, 1].imshow(slices_morphed[1])
+    axs[0, 2].imshow(slices_deformation[1])
+    # for i, ax in enumerate(axs.flat):
+    #     im = ax.imshow(slices[i], cmap=cmap)
+    #     if line:
+    #         ax.axvline(x=slices[i].shape[1] // 2)
+
+    if name != "unnamed":
+        fig.suptitle(f"Iteration: {name}, Loss: {loss:.3f}")
+    if save:
+        fig.savefig(f"{save_location}/{name}.png", dpi=200)
+
+    if use_wandb:
+        wandb.log({name: fig})
+
+    plt.show(block=False)
+    plt.close()
+
+
 def plot_from3d(img, slice=200, line=True, mask=None):
     s = None
     if len(img.shape) == 5:
