@@ -37,7 +37,7 @@ def calculate_loss(img, skull, annotations, d_field, v_field, log=False):
     # Regularization items
     loss_jacobian = jacobian_loss(v_field, voxel_size=(0.434, 0.434, 1.5), seg_mask=hematoma,
                                   stripped_brain=img)  # TODO: parse the affine for size
-    # loss_l1_gradient = spatial_gradient_l1(v_field)
+    loss_l1_gradient = spatial_gradient_l1(v_field)
 
     # General items
     loss_hematoma_decrease = volume_loss(hematoma, morphed_hematoma)
@@ -47,24 +47,29 @@ def calculate_loss(img, skull, annotations, d_field, v_field, log=False):
 
     # Ventricle based item
     loss_ventricle_overlap = ventricle_overlap(morphed_left_ventricle, morphed_right_ventricle)
+    loss_ventricle_wrong_side = ventricle_wrong_side(morphed_left_ventricle, morphed_right_ventricle)
 
     big_loss = (loss_jacobian +
-                # loss_l1_gradient +
+                10.0 * loss_l1_gradient +
                 loss_hematoma_decrease +
-                loss_skull +
+                10.0 * loss_skull +
                 loss_ventricle_overlap +
-                loss_jeffrey +
-                loss_ssim)
+                5.0 * loss_jeffrey +
+                loss_ssim +
+                loss_ventricle_wrong_side
+
+                )
 
     if log:
         out = {
             "Jacobian": loss_jacobian.item(),
-            # "L1 gradient": loss_l1_gradient.item(),
+            "L1 gradient": loss_l1_gradient.item(),
             "Hematoma decrease": loss_hematoma_decrease.item(),
             "Skull decrease": loss_skull.item(),
             "SSIM": loss_ssim.item(),
             "Jeffrey": loss_jeffrey.item(),
             "Ventricle overlap": loss_ventricle_overlap.item(),
+            "Ventricle wrong side": loss_ventricle_wrong_side.item()
         }
         wandb.log(out)
 
@@ -114,8 +119,8 @@ def train_morph(run_name, num_epochs, location, data_location, batch_size=1, num
             optimizer.step()
             wandb.log({"training_loss": loss.item()})
 
-        if epoch % 20 == 0:
-            detailed_morph(img, morphed_image_full, deformation_field, use_wandb=True)
+        # if epoch % 20 == 0:
+        detailed_morph(img, morphed_image_full, deformation_field, use_wandb=True)
 
 
         if epoch % 200 == 0:
