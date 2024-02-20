@@ -16,12 +16,15 @@ def calculate_loss(img, skull, annotations, d_field, v_field, log=False):
 
     # Segmentation results
     one_hot_mask = torch.nn.functional.one_hot(annotations.to(torch.int64))[0].permute(0, -1, 1, 2, 3)
-    hematoma = one_hot_mask[:, 1]
-    left_ventricle = one_hot_mask[:, 2]
-    right_ventricle = one_hot_mask[:, 3]
+    hematoma = one_hot_mask[:, 1].unsqueeze(dim=0).float()
+    left_ventricle = one_hot_mask[:, 2].unsqueeze(dim=0).float()
+    right_ventricle = one_hot_mask[:, 3].unsqueeze(dim=0).float()
 
     # Morphed bois
     morphed_img = apply_deformation_field(img, d_field)
+    # print("hematoma", hematoma.shape)
+    # print(annotations.shape)
+
     morphed_hematoma = apply_deformation_field(hematoma, d_field)
     morphed_left_ventricle = apply_deformation_field(left_ventricle, d_field)
     morphed_right_ventricle = apply_deformation_field(right_ventricle, d_field)
@@ -34,7 +37,7 @@ def calculate_loss(img, skull, annotations, d_field, v_field, log=False):
     # Regularization items
     loss_jacobian = jacobian_loss(v_field, voxel_size=(0.434, 0.434, 1.5), seg_mask=hematoma,
                                   stripped_brain=img)  # TODO: parse the affine for size
-    loss_l1_gradient = spatial_gradient_l1(v_field)
+    # loss_l1_gradient = spatial_gradient_l1(v_field)
 
     # General items
     loss_hematoma_decrease = volume_loss(hematoma, morphed_hematoma)
@@ -46,7 +49,7 @@ def calculate_loss(img, skull, annotations, d_field, v_field, log=False):
     loss_ventricle_overlap = ventricle_overlap(morphed_left_ventricle, morphed_right_ventricle)
 
     big_loss = (loss_jacobian +
-                loss_l1_gradient +
+                # loss_l1_gradient +
                 loss_hematoma_decrease +
                 loss_skull +
                 loss_ventricle_overlap +
@@ -56,7 +59,7 @@ def calculate_loss(img, skull, annotations, d_field, v_field, log=False):
     if log:
         out = {
             "Jacobian": loss_jacobian.item(),
-            "L1 gradient": loss_l1_gradient.item(),
+            # "L1 gradient": loss_l1_gradient.item(),
             "Hematoma decrease": loss_hematoma_decrease.item(),
             "Skull decrease": loss_skull.item(),
             "SSIM": loss_ssim.item(),
@@ -104,9 +107,13 @@ def train_morph(run_name, num_epochs, location, data_location, batch_size=1, num
 
             morphed_image_full, velocity_field, deformation_field = model(img)
 
-            loss = calculate_loss(img, d['skull'].to(device), d['annotations'].to(device), deformation_field,
+            print("Loss")
+            print("deformation", deformation_field.shape)
+
+            loss = calculate_loss(img, d['skull'].to(device), d['annotation'].to(device), deformation_field,
                                   velocity_field)
 
+            print('backward')
             loss.backward()
             optimizer.step()
             wandb.log({"training_loss": loss.item()})
