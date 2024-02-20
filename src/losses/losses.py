@@ -145,24 +145,29 @@ def foreground_loss(original_foreground, morphed_img):
 
 
 def spatial_gradient_l1(deformation_field):
-    volume_shape = deformation_field.shape[2:]
+    volume_shape = deformation_field.shape[2:]  # Assuming the input is [B, C, *SpatialDims]
 
-    dfs = []
+    dfs_sum = 0
 
     for dim in range(len(volume_shape)):
-        # For the dim we are working on, make the field look like (dim, 0, 1, (skip the dim), 3, 4, 5) etc.
-        d = dim + 2
-        r = [d, *range(0, d), *range(d + 1, len(volume_shape) + 2)]
-        d_r = deformation_field.permute(r)
+        # Compute the gradient along each spatial dimension independently
+        slice1 = [slice(None)] * len(deformation_field.shape)  # All items along all dimensions
+        slice2 = [slice(None)] * len(deformation_field.shape)
+        
+        slice1[dim + 2] = slice(1, None)   # Shift start to exclude the first element along the current spatial dimension
+        slice2[dim + 2] = slice(None, -1)  # Shift end to exclude the last element along the current spatial dimension
+        
+        # Calculate the gradient by subtracting shifted views
+        df_dim = deformation_field[slice1] - deformation_field[slice2]
+        
+        # Calculate the L1 norm of the gradient and mean across all dimensions except the batch dimension
+        df_abs_mean = torch.mean(torch.abs(df_dim), dim=list(range(1, df_dim.ndim)))
+        
+        # Accumulate the mean gradients
+        dfs_sum += df_abs_mean
 
-        # Shift left and right by omitting the first or the last element
-        df_r = d_r[1:, ...] - d_r[:-1, ...]
-        dfs.append(df_r)
-
-    dfs = [torch.abs(df) for df in dfs]
-
-    dfs = [torch.mean(torch.flatten(df, start_dim=1), dim=-1) for df in dfs]
-    grad = sum(dfs) / len(dfs)
+    # Average the accumulated gradients over the number of dimensions
+    grad = dfs_sum / len(volume_shape)
 
     return grad.mean()
 
