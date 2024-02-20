@@ -19,5 +19,5 @@ if __name__ == '__main__':
 
     # train_segmentation(batch_size=2, run_name=run_name, location=location, slice_thickness="large", dims=3, num_epochs=5000, loader_num_workers=8)
     # optimize_centers(location=location, run_name=run_name, batch_size=1, num_epochs=200, slice_thickness='large')
-    train_morph(run_name=run_name, num_epochs=100, location=location, data_location="/data/final_dataset.hdf5", num_workers=8)
+    train_morph(run_name=run_name, num_epochs=100, location=location, data_location="/data/final_dataset.hdf5", num_workers=8, log=True)
 

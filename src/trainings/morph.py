@@ -64,7 +64,7 @@ def calculate_loss(img, skull, annotations, d_field, v_field, log=False):
             "Skull decrease": loss_skull.item(),
             "SSIM": loss_ssim.item(),
             "Jeffrey": loss_jeffrey.item(),
-            "Ventricle overlap": loss_ventricle_overlap.iten(),
+            "Ventricle overlap": loss_ventricle_overlap.item(),
         }
         wandb.log(out)
 
@@ -72,7 +72,7 @@ def calculate_loss(img, skull, annotations, d_field, v_field, log=False):
 
 
 def train_morph(run_name, num_epochs, location, data_location, batch_size=1, num_workers=8, lr=3e-4,
-                input_spatial_shape=(512, 512, 128)):
+                input_spatial_shape=(512, 512, 128), log=True):
     print(f"Started morphing things out: {run_name}")
 
     save_location = f"{location}/outputs/morph/{run_name}"
@@ -107,13 +107,9 @@ def train_morph(run_name, num_epochs, location, data_location, batch_size=1, num
 
             morphed_image_full, velocity_field, deformation_field = model(img)
 
-            print("Loss")
-            print("deformation", deformation_field.shape)
-
             loss = calculate_loss(img, d['skull'].to(device), d['annotation'].to(device), deformation_field,
-                                  velocity_field)
+                                  velocity_field, log=log)
 
-            print('backward')
             loss.backward()
             optimizer.step()
             wandb.log({"training_loss": loss.item()})
