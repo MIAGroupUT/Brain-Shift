@@ -37,7 +37,7 @@ def infer_centered(run_name, location, read_location, slice_thickness='small', d
 
         name = brain['name'][0]
         affine = brain['affine'][0]
-        img = brain['ct'][0].to("cuda").transpose(1, 2).unsqueeze(dim=0)
+        img = brain['ct'].to("cuda").transpose(1, 2).unsqueeze(dim=0)
 
         items = np.load(f"{location}/outputs/centering/{read_location}/rotations/{name}.npy")
 
@@ -53,7 +53,7 @@ def infer_centered(run_name, location, read_location, slice_thickness='small', d
         }
 
         if do_annotations:
-            mask = brain['annotation'][0].to("cuda").transpose(1, 2).unsqueeze(dim=0)
+            mask = brain['annotation'].to("cuda").transpose(1, 2).unsqueeze(dim=0)
             print(mask.shape)
             m_t = translate_and_rotate(mask, torch.tensor([items[0, 0]]).to("cuda"),
                                        torch.tensor([items[1, 0]]).to("cuda"), torch.tensor([items[2, 0]]).to("cuda"),

@@ -1,0 +1,51 @@
+wandb: Currently logged in as: barisimre. Use `wandb login --relogin` to force relogin
+wandb: wandb version 0.16.3 is available!  To upgrade, please run:
+wandb:  $ pip install wandb --upgrade
+wandb: Tracking run with wandb version 0.16.2
+wandb: Run data is saved locally in /home/imreb/brain-morphing/wandb/run-20240220_130750-581oybmh
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run testing_morph_boi
+wandb: ⭐️ View project at https://wandb.ai/barisimre/debug
+wandb: 🚀 View run at https://wandb.ai/barisimre/debug/runs/581oybmh
+/home/imreb/.conda/envs/brain-shift/lib/python3.10/site-packages/torch/functional.py:504: UserWarning: torch.meshgrid: in an upcoming release, it will be required to pass the indexing argument. (Triggered internally at ../aten/src/ATen/native/TensorShape.cpp:3526.)
+  return _VF.meshgrid(tensors, **kwargs)  # type: ignore[attr-defined]
+  0%|          | 0/100 [00:00<?, ?it/s]/home/imreb/.conda/envs/brain-shift/lib/python3.10/site-packages/monai/losses/dice.py:161: UserWarning: single channel prediction, `include_background=False` ignored.
+  warnings.warn("single channel prediction, `include_background=False` ignored.")
+/home/imreb/.conda/envs/brain-shift/lib/python3.10/site-packages/torch/utils/checkpoint.py:429: UserWarning: torch.utils.checkpoint: please pass in use_reentrant=True or use_reentrant=False explicitly. The default value of use_reentrant will be updated to be False in the future. To maintain current behavior, pass use_reentrant=True. It is recommended that you use use_reentrant=False. Refer to docs for more details on the differences between the two variants.
+  warnings.warn(
+  0%|          | 0/100 [01:35<?, ?it/s]
+Traceback (most recent call last):
+  File "/home/imreb/.conda/envs/brain-shift/lib/python3.10/runpy.py", line 196, in _run_module_as_main
+    return _run_code(code, main_globals, None,
+  File "/home/imreb/.conda/envs/brain-shift/lib/python3.10/runpy.py", line 86, in _run_code
+    exec(code, run_globals)
+  File "/home/imreb/brain-morphing/src/main.py", line 22, in <module>
+    train_morph(run_name=run_name, num_epochs=100, location=location, data_location="/data/final_dataset.hdf5", num_workers=8, log=True)
+  File "/home/imreb/brain-morphing/src/trainings/morph.py", line 118, in train_morph
+    detailed_morph(img, morphed_image_full, deformation_field, use_wandb=True)
+  File "/home/imreb/brain-morphing/src/utils/brain_visualization.py", line 139, in detailed_morph
+    slices_deformation = [torch.rot90(d_field[slice_x, :, :]), d_field[:, :, slice_z]]
+IndexError: too many indices for tensor of dimension 2
+wandb: WARNING No program path found, not creating job artifact. See https://docs.wandb.ai/guides/launch/create-job
+wandb: - 0.008 MB of 0.008 MB uploadedwandb: \ 0.008 MB of 0.008 MB uploadedwandb: | 0.014 MB of 0.014 MB uploadedwandb: 
+wandb: Run history:
+wandb: Hematoma decrease ████████████▇▇▇▇▇▇▆▅▆▃▅▁▄
+wandb:          Jacobian ▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁
+wandb:           Jeffrey ▁▁▃▁▁▂▂▁▃▂▂▁▃▁▃▆▅▃▂▂▂▁█▃█
+wandb:              SSIM ▇▅▂▃▆▂█▅▁▄▁▄▃▁▁▅▃▅▃▆▄▂▄▄▄
+wandb:    Skull decrease ▁▂▁▁▂▂▂▂▂▂▂▂▂▂▃▃▃▄▄▅▄▆▆▇█
+wandb: Ventricle overlap ▅▄▇▄▅▆▄▅▂▅▄▂▆▁▆█▆▇▄▆▅▃▆▆▆
+wandb:     training_loss ▆▅▆▄▅▅▆▅▂▅▃▂▅▁▅█▅▇▄▆▅▂▆▅▇
+wandb: 
+wandb: Run summary:
+wandb: Hematoma decrease 0.95732
+wandb:          Jacobian 0.0
+wandb:           Jeffrey 0.10395
+wandb:              SSIM 0.31704
+wandb:    Skull decrease 0.02849
+wandb: Ventricle overlap 0.43827
+wandb:     training_loss 1.84508
+wandb: 
+wandb: 🚀 View run testing_morph_boi at: https://wandb.ai/barisimre/debug/runs/581oybmh
+wandb: Synced 6 W&B file(s), 0 media file(s), 0 artifact file(s) and 0 other file(s)
+wandb: Find logs at: ./wandb/run-20240220_130750-581oybmh/logs
