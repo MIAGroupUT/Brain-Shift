@@ -38,7 +38,7 @@ def train_segmentation(run_name, location, batch_size, num_epochs=1000, slice_th
             spatial_dims=2,
             in_channels=1,
             out_channels=4,
-            drop_rate=0.2
+            drop_rate=0.1
         ).to(device)
 
     if dims == 3:
@@ -50,7 +50,7 @@ def train_segmentation(run_name, location, batch_size, num_epochs=1000, slice_th
             spatial_dims=3,
             in_channels=1,
             out_channels=4,
-            drop_rate=0.2
+            drop_rate=0.1
         ).to(device)
 
     optimizer = torch.optim.Adam(model.parameters(), lr=lr)

@@ -35,7 +35,7 @@ def calculate_loss(img, skull, annotations, d_field, v_field, log=False):
     # ---- LOSSES -----
 
     # Regularization items
-    loss_jacobian = jacobian_loss(v_field, voxel_size=(0.434, 0.434, 1.5), seg_mask=hematoma,
+    loss_jacobian = jacobian_loss(v_field, voxel_size=(0.434, 0.434, 3.0), seg_mask=hematoma,
                                   stripped_brain=img)  # TODO: parse the affine for size
     loss_l1_gradient = spatial_gradient_l1(v_field)
 
@@ -49,13 +49,13 @@ def calculate_loss(img, skull, annotations, d_field, v_field, log=False):
     loss_ventricle_overlap = ventricle_overlap(morphed_left_ventricle, morphed_right_ventricle)
     loss_ventricle_wrong_side = ventricle_wrong_side(morphed_left_ventricle, morphed_right_ventricle)
 
-    big_loss = (loss_jacobian +
-                10.0 * loss_l1_gradient +
+    big_loss = (10.0 * loss_jacobian +
+                1.0 * loss_l1_gradient +
                 loss_hematoma_decrease +
                 10.0 * loss_skull +
-                loss_ventricle_overlap +
-                5.0 * loss_jeffrey +
-                loss_ssim +
+                2.0 * loss_ventricle_overlap +
+                loss_jeffrey +
+                3.0 * loss_ssim + 
                 loss_ventricle_wrong_side
 
                 )
@@ -120,7 +120,7 @@ def train_morph(run_name, num_epochs, location, data_location, batch_size=1, num
             wandb.log({"training_loss": loss.item()})
 
         # if epoch % 20 == 0:
-        detailed_morph(img, morphed_image_full, deformation_field, use_wandb=True)
+        detailed_morph(img, morphed_image_full, deformation_field, use_wandb=True, cmap_d="coolwarm")
 
 
         if epoch % 200 == 0:
