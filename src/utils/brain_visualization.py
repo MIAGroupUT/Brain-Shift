@@ -112,7 +112,7 @@ def vis_to_wandb_segmentation_3d(img, output, mask, names, loss, epoch, save=Fal
         if use_wandb:
             wandb.log({"plot": fig})
         else:
-            plt.imshow()
+            plt.imshow(fig)
         plt.close(fig)
 
 
