@@ -1,0 +1,59 @@
+{
+  "participant": {
+    "age": {
+      "Description": "age of the participant",
+      "Units": "years"
+    },
+    "sex": {
+      "Description": "sex of the participant",
+      "Levels": {
+        "M": "male",
+        "F": "female"
+      }
+    },
+    "hematoma_side" : {
+      "Description": "Side of the brain on which the hematoma is at the time of the diagnosis",
+      "Levels": {
+        "left": "left side",
+        "right": "right",
+        "bilateral": "both side"
+      }
+    },
+    "surgery": {
+      "Description" : "Boolean to indicate if surgery was performed after the diagnosis"
+    },
+    "recurrence" : {
+      "Description" : "Boolean to indicate if a new bleeding occurred during the follow-up"
+    }
+
+  },
+  "session": {
+    "session_label" : {
+      "Description": "Label of the session found based on the dates of diagnosis and surgery",
+      "Levels": {
+        "prediag": "Session before any cSDH was found. Can be considered as a pseudo-healthy counterpart",
+        "diag": "Session at the time of the diagnosis. Most of the time, this is where the hematoma is the largest",
+        "postop": "Session just after surgery. Water can be visible in the brain CT",
+        "followup": "Session obtained after diagnosis (and eventually surgery). A hematoma may or not be visible."
+      }
+    }
+  },
+  "scan": {
+    "filename": {
+      "Description": "path to the NifTi file from this folder"
+    },
+    "original_series": {
+      "Description": "series of the image in the XNAT data set. For annotation files, correspond to the series of the annotated image"
+    },
+    "slice_thickness": {
+      "Description": "thickness of an axial slice",
+      "Units": "mm"
+    },
+    "original_seg_filename": {
+      "Description": "for annotation files only, correspond to the filename in the original XNAT data set."
+    },
+    "interpolation": {
+      "Description": "boolean to state if the image is original if it has been resized."
+    }
+  }
+}

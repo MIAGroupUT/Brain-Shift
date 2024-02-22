@@ -31,8 +31,8 @@ def add_background_channel(annotations):
 
 class AnnotatedBidsDataset(Dataset):
     def __init__(self, bids_path: str, slice_thickness: str = None,
-                 exclude_registered: object = True,
-                 caching: object = True, transform=cached_transform):
+                 exclude_registered: object = False,
+                 caching: object = True, transform=cached_transform, flip_registered=True):
         self.bids_path = bids_path
         self.caching = caching
         annotation_path_list = glob(path.join(bids_path, "sub-*", "ses-*", "annotation", "*annotation.nii.gz"))
@@ -86,12 +86,18 @@ class AnnotatedBidsDataset(Dataset):
         for channel in range(3):
             channels_annotation_np[channel] = annotation_np == (channel + 1)
 
+        mask = add_background_channel(torch.tensor(channels_annotation_np, dtype=torch.float))
+
+        if "true" in registration:
+            print("Flip")
+            mask = torch.flip(mask, dims=[-1])
+
         if self.caching:
 
             self.cache[index] = {
                 'name': f"{participant_id}_{session_id}_{slice_thickness}_{registration}",
                 "ct": torch.tensor(ct_np, dtype=torch.float),
-                "annotation": add_background_channel(torch.tensor(channels_annotation_np, dtype=torch.float)),
+                "annotation": mask,
                 'affine': nifti_data.affine
             }
 
@@ -104,7 +110,7 @@ class AnnotatedBidsDataset(Dataset):
                 {
                     'name': f"{participant_id}_{session_id}_{slice_thickness}_{registration}",
                     "ct": torch.tensor(ct_np, dtype=torch.float),
-                    "annotation": add_background_channel(torch.tensor(channels_annotation_np, dtype=torch.float)),
+                    "annotation": mask,
                     'affine': nifti_data.affine
                 }
             )

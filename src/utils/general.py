@@ -13,7 +13,10 @@ def save_brain(img, name):
 
 def add_result_to_hdf5(d, h5_file):
     with h5py.File(h5_file, 'a') as hf:
-        subj_group = hf.create_group(d['name'])
+        try:
+            subj_group = hf.create_group(d['name'])
+        except TypeError:
+            subj_group = hf.create_group(d['name'][0])
         for k, v in d.items():
 
             if k == 'name':

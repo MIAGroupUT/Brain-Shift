@@ -1,7 +1,7 @@
 import torch
 from torch.utils.data import DataLoader
 import wandb
-from src.data_loading.datasets import AllBidsDataset, Dataset3D, AnnotatedBidsDataset
+from src.data_loading.datasets import AllBidsDataset, Dataset3D, AnnotatedBidsDataset, HDF5Dataset
 from src.losses.losses import jeffreys_divergence_loss, ssim_loss, pixel_loss
 from src.utils.movement import translate_and_rotate
 from src.utils.general import *
@@ -11,7 +11,7 @@ import os
 import shutil
 
 
-def optimize_centers(run_name, num_epochs, location, batch_size=1, slice_thickness="small"):
+def optimize_centers(run_name, num_epochs, location, hdf5_target, batch_size=1):
     print(f"Started optimizing centers with the run name: {run_name}")
 
     save_location = f"{location}/outputs/centering/{run_name}"
@@ -26,7 +26,7 @@ def optimize_centers(run_name, num_epochs, location, batch_size=1, slice_thickne
     os.mkdir(path=f"{save_location}/rotations")
 
     print("Loading data_loading")
-    dataset = AnnotatedBidsDataset(f"{location}/data/bids", slice_thickness=slice_thickness, caching=False)
+    dataset = HDF5Dataset(f"{location}/data/hdf5/{hdf5_target}")
 
     dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=True)
 
@@ -43,7 +43,7 @@ def optimize_centers(run_name, num_epochs, location, batch_size=1, slice_thickne
         name = brain['name'][0]
         tqdm.write(f"Optimizing for: {name}")
 
-        img = brain['ct'].to("cuda").transpose(1, 2).unsqueeze(dim=0)
+        img = brain['ct'].to("cuda")[0].transpose(1, 2).unsqueeze(dim=0)
 
         for e in tqdm(range(num_epochs), position=1):
             optimizer.zero_grad()
