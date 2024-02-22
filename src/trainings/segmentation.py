@@ -9,8 +9,8 @@ import os
 import shutil
 
 
-def train_segmentation(run_name, location, batch_size, num_epochs=1000, lr=3e-4, device="cuda",
-                       dims=2, loader_num_workers=1):
+def train_segmentation(run_name, location, hdf5_name,  batch_size, num_epochs=1000, lr=3e-4, device="cuda",
+                       dims=2, loader_num_workers=8):
     out_dir = f"{location}/outputs/{run_name}"
     try:
         os.mkdir(path=out_dir)
@@ -24,8 +24,8 @@ def train_segmentation(run_name, location, batch_size, num_epochs=1000, lr=3e-4,
     print("Loading data_loading")
 
     # dataset = AnnotatedBidsDataset(f"{location}/data", slice_thickness=slice_thickness)
-    filename = f"{location}/data/morning_centers_infer.hdf5"
-    dataset = HDF5Dataset(hdf5_filename=filename, with_skulls=False)
+    filename = f"{location}/data/hdf5/{hdf5_name}"
+    dataset = HDF5Dataset(hdf5_filename=filename, with_annotations=True)
     dataloader = None
     model = None
 
