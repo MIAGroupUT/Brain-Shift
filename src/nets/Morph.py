@@ -8,20 +8,35 @@ from src.nets.voxelmorph_layers import *
 # Inspired by Voxelmorph, should morph an image in a diffeomorphic way.
 class Morph(nn.Module):
 
-    def __init__(self, in_shape, *args, **kwargs):
+    def __init__(self, in_shape, mode='general', *args, **kwargs):
         super().__init__(*args, **kwargs)
 
         self.in_shape = in_shape
         self.n_dim = len(in_shape)
 
-        self.unet = monai.networks.nets.UNet(
-            spatial_dims=3,
-            in_channels=1,
-            out_channels=self.n_dim,
-            channels=(16, 32, 64, 128),
-            strides=(2, 2, 2),
-            num_res_units=2,
-        )
+        if mode == 'general' or mode == 'instance':
+
+            self.unet = monai.networks.nets.UNet(
+                spatial_dims=3,
+                in_channels=1,
+                out_channels=self.n_dim,
+                channels=(16, 32, 64, 128),
+                strides=(2, 2, 2),
+                num_res_units=2,
+            )
+
+        elif mode == 'aided' or mode == 'instance_aided':
+
+            self.unet = monai.networks.nets.UNet(
+                spatial_dims=3,
+                in_channels=1+4,
+                out_channels=self.n_dim,
+                channels=(16, 32, 64, 128),
+                strides=(2, 2, 2),
+                num_res_units=2,
+            )
+        else:
+            raise NotImplementedError
 
         # self.unet = monai.networks.nets.SwinUNETR(
         #     img_size=in_shape,

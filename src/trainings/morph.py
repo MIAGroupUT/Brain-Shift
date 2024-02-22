@@ -77,7 +77,7 @@ def calculate_loss(img, skull, annotations, d_field, v_field, log=False):
 
 
 def train_morph(run_name, num_epochs, location, data_location, batch_size=1, num_workers=8, lr=3e-4,
-                input_spatial_shape=(512, 512, 128), log=True):
+                input_spatial_shape=(512, 512, 128), log=True, mode='general'):
     print(f"Started morphing things out: {run_name}")
 
     save_location = f"{location}/outputs/morph/{run_name}"
@@ -96,7 +96,7 @@ def train_morph(run_name, num_epochs, location, data_location, batch_size=1, num
     dataset = HDF5Dataset(f"{location}/{data_location}", with_skulls=True, with_annotations=True)
     dataloader = DataLoader(dataset, batch_size=batch_size, num_workers=num_workers, shuffle=True)
 
-    model = Morph(input_spatial_shape).to(device)
+    model = Morph(input_spatial_shape, mode=mode).to(device)
 
     optimizer = torch.optim.Adam(model.parameters(), lr=lr)
     scheduler = torch.optim.lr_scheduler.ExponentialLR(optimizer, gamma=0.9993)
@@ -109,10 +109,15 @@ def train_morph(run_name, num_epochs, location, data_location, batch_size=1, num
             names = d['name']
             optimizer.zero_grad()
             img = d['ct'].to(device)
+            mask = d['annotation'].to(device)
 
-            morphed_image_full, velocity_field, deformation_field = model(img)
+            if mode == 'general':
 
-            loss = calculate_loss(img, d['skull'].to(device), d['annotation'].to(device), deformation_field,
+                morphed_image_full, velocity_field, deformation_field = model(img)
+            elif mode == 'aided':
+                morphed_image_full, velocity_field, deformation_field = model(torch.cat([img, mask]), dim=1)
+
+            loss = calculate_loss(img, d['skull'].to(device), mask, deformation_field,
                                   velocity_field, log=log)
 
             loss.backward()
