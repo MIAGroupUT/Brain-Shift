@@ -10,7 +10,6 @@ from datetime import datetime
 
 
 def convert(bids_path, xnat_path, annotations_path, meta_path):
-
     # bids_path = '/Users/elina/Documents/bids'  # where the results are stored
     # xnat_path = '/Users/elina/Documents/XNAT_data'  # where XNAT raw data was dumped
     # annotations_path = '/Users/elina/Documents/annotations/2023-12-04_10-39-55'  # where XNAT annotation data was dumped
@@ -100,24 +99,25 @@ def convert(bids_path, xnat_path, annotations_path, meta_path):
                     annotation_filename = f"sub-{patient_id}_ses-{session_id}_" \
                                           f"annotator-{annotator_index}_{desc}_annotation.nii.gz"
                     image_seg.save(path.join(bids_session_path, annotation_filename))
+                    print("Saved annotation")
 
                     # Add meta-data
                     row_df = image_seg.compute_scans_tsv(annotation_filename)
                     bids_scans_df = pd.concat((bids_scans_df, row_df))
 
-                    # Interpolate to small slice thickness domain if large thickness was annotated
-                    if series_name == "large_series":
-                        small_series_nb = meta_scans_df.loc[(patient_id, session_id), "small_series"]
-                        image_seg.resize_to_target(path.join(xnat_session_path, str(int(small_series_nb)), "DICOM"))
-
-                        desc = desc_dict["small_series"]
-                        annotation_filename = f"sub-{patient_id}_ses-{session_id}_" \
-                                              f"annotator-{annotator_index}_{desc}_annotation.nii.gz"
-                        image_seg.save(path.join(bids_session_path, annotation_filename))
-
-                        # Add meta-data
-                        row_df = image_seg.compute_scans_tsv(annotation_filename)
-                        bids_scans_df = pd.concat((bids_scans_df, row_df))
+                    # # Interpolate to small slice thickness domain if large thickness was annotated
+                    # if series_name == "large_series":
+                    #     small_series_nb = meta_scans_df.loc[(patient_id, session_id), "small_series"]
+                    #     image_seg.resize_to_target(path.join(xnat_session_path, str(int(small_series_nb)), "DICOM"))
+                    #
+                    #     desc = desc_dict["small_series"]
+                    #     annotation_filename = f"sub-{patient_id}_ses-{session_id}_" \
+                    #                           f"annotator-{annotator_index}_{desc}_annotation.nii.gz"
+                    #     image_seg.save(path.join(bids_session_path, annotation_filename))
+                    #
+                    #     # Add meta-data
+                    #     row_df = image_seg.compute_scans_tsv(annotation_filename)
+                    #     bids_scans_df = pd.concat((bids_scans_df, row_df))
 
             except AttributeError:
                 warn(f"Segmentation file of patient {patient_id} session {session_id} could not be extracted.")
@@ -196,3 +196,14 @@ def convert(bids_path, xnat_path, annotations_path, meta_path):
             sep="\t",
             index=False
         )
+
+
+if __name__ == '__main__':
+    location = "/home/baris/Desktop/xnat"
+
+    convert(
+        bids_path=f"{location}/bids",
+        meta_path=f"{location}/meta",
+        xnat_path=f"{location}/xnat_new",
+        annotations_path=f"{location}/xnat_annotations",
+    )

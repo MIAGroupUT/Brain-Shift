@@ -9,7 +9,7 @@ import os
 import shutil
 
 
-def train_segmentation(run_name, location, batch_size, num_epochs=1000, slice_thickness='small', lr=3e-4, device="cuda",
+def train_segmentation(run_name, location, batch_size, num_epochs=1000, lr=3e-4, device="cuda",
                        dims=2, loader_num_workers=1):
     out_dir = f"{location}/outputs/{run_name}"
     try:
