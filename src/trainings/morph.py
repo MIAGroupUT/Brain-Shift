@@ -50,7 +50,7 @@ def calculate_loss(img, skull, annotations, d_field, v_field, log=False):
     loss_ventricle_wrong_side = ventricle_wrong_side(morphed_left_ventricle, morphed_right_ventricle)
 
     big_loss = (10.0 * loss_jacobian +
-                1.0 * loss_l1_gradient +
+                100.0 * loss_l1_gradient +
                 loss_hematoma_decrease +
                 10.0 * loss_skull +
                 2.0 * loss_ventricle_overlap +
@@ -110,12 +110,13 @@ def train_morph(run_name, num_epochs, location, data_location, batch_size=1, num
             optimizer.zero_grad()
             img = d['ct'].to(device)
             mask = d['annotation'].to(device)
+            one_hot_mask = torch.nn.functional.one_hot(mask.to(torch.int64))[0].permute(0, -1, 1, 2, 3)
 
             if mode == 'general':
 
                 morphed_image_full, velocity_field, deformation_field = model(img)
             elif mode == 'aided':
-                morphed_image_full, velocity_field, deformation_field = model(torch.cat([img, mask]), dim=1)
+                morphed_image_full, velocity_field, deformation_field = model(torch.cat([img, one_hot_mask], dim=1))
 
             loss = calculate_loss(img, d['skull'].to(device), mask, deformation_field,
                                   velocity_field, log=log)

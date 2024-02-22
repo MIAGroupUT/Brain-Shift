@@ -132,7 +132,7 @@ def detailed_morph(img, morphed, d_field, slice=None, line=True, name="unnamed",
     img = img[0, 0].cpu().detach()
     morphed = morphed[0, 0].cpu().detach()
     d_field = d_field[0].cpu().detach()
-    d_field = torch.sum(d_field, dim=0)
+    d_field = torch.sum(torch.abs(d_field), dim=0)
 
     # print(img.shape)
 
