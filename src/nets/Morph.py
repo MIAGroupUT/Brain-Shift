@@ -38,14 +38,6 @@ class Morph(nn.Module):
         else:
             raise NotImplementedError
 
-        # self.unet = monai.networks.nets.SwinUNETR(
-        #     img_size=in_shape,
-        #     in_channels=1,
-        #     out_channels=self.n_dim,
-        #     feature_size=12,
-        #     use_checkpoint=True
-        # )
-
         if self.n_dim == 2:
             self.flow_conv = nn.Conv2d(self.n_dim, self.n_dim, kernel_size=3, padding='same')
         else:
