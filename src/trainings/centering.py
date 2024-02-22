@@ -43,7 +43,7 @@ def optimize_centers(run_name, num_epochs, location, hdf5_target, batch_size=1):
         name = brain['name'][0]
         tqdm.write(f"Optimizing for: {name}")
 
-        img = brain['ct'].to("cuda").transpose(1, 2).unsqueeze(dim=0)
+        img = brain['ct'].to("cuda")[0].transpose(1, 2).unsqueeze(dim=0)
 
         for e in tqdm(range(num_epochs), position=1):
             optimizer.zero_grad()
