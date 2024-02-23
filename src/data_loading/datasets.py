@@ -87,10 +87,10 @@ class AnnotatedBidsDataset(Dataset):
             channels_annotation_np[channel] = annotation_np == (channel + 1)
 
         mask = add_background_channel(torch.tensor(channels_annotation_np, dtype=torch.float))
-
-        if "true" in registration:
-            print("Flip")
-            mask = torch.flip(mask, dims=[-1])
+        #
+        # if "true" in registration:
+        #     print("Flip")
+        #     mask = torch.flip(mask, dims=[-1])
 
         if self.caching:
 

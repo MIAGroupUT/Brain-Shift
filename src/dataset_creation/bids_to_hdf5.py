@@ -2,6 +2,7 @@ from src.data_loading.datasets import AllBidsDataset, AnnotatedBidsDataset
 from monai.data import DataLoader
 from src.utils.general import add_result_to_hdf5
 from tqdm import tqdm
+import torch
 
 
 def all_bids_to_hdf5(bids_location, hdf5_path, slice_thickness, exclude_registered):
@@ -29,8 +30,15 @@ def annotated_bids_to_hdf5(bids_location, hdf5_path, slice_thickness, exclude_re
 
         n = {}
         for k in item:
-            # TODO: make sure of typing as well
-            n[k] = item[k][0]
+            # if 'true' in item['name']:
+            #     print("Registered")
+            #
+            #     if k == "annotation":
+            #         # The registered series has flipped annotations by mistake
+            #         n[k] = torch.flip(item[k][0], dims=[-1])
+            #         continue
+
+            n[k] = torch.flip(item[k][0], dims=[-1])
 
         add_result_to_hdf5(n, hdf5_path)
 
