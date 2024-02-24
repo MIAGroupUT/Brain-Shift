@@ -38,7 +38,7 @@ def annotated_bids_to_hdf5(bids_location, hdf5_path, slice_thickness, exclude_re
             #         n[k] = torch.flip(item[k][0], dims=[-1])
             #         continue
 
-            n[k] = torch.flip(item[k][0], dims=[-1])
+            n[k] = item[k][0]
 
         add_result_to_hdf5(n, hdf5_path)
 
