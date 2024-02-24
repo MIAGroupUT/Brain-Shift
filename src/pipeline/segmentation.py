@@ -11,8 +11,8 @@ from src.utils.skull_stripping import skull_mask
 from src.utils.general import add_result_to_hdf5
 
 
-def infer_segmentation(location, relative_model_path, run_name, hdf5_location, device="cuda", make_hdf5=True, do_skull_strip=False):
-
+def infer_segmentation(location, relative_model_path, run_name, hdf5_location, device="cuda", make_hdf5=True,
+                       do_skull_strip=False):
     out_dir = f"{location}/outputs/inferred/segmentation/{run_name}"
     try:
         os.mkdir(path=out_dir)
@@ -22,7 +22,6 @@ def infer_segmentation(location, relative_model_path, run_name, hdf5_location, d
     os.mkdir(path=f"{out_dir}/visuals")
     os.mkdir(path=f"{out_dir}/out")
     os.mkdir(path=f"{out_dir}/tensors")
-
 
     hdf5_file = f'{out_dir}/{run_name}.hdf5'
 
@@ -66,7 +65,7 @@ def infer_segmentation(location, relative_model_path, run_name, hdf5_location, d
             d = {
                 'ct': brain[0],
                 'annotation': output[0],
-                'affine': affine,
+                'affine': affine[0],
                 'name': name
             }
 

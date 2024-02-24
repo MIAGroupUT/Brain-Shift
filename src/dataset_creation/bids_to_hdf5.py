@@ -45,16 +45,16 @@ def annotated_bids_to_hdf5(bids_location, hdf5_path, slice_thickness, exclude_re
 
 if __name__ == '__main__':
     location = "/home/baris/Documents/brain-morphing"
-    # all_bids_to_hdf5(
-    #     bids_location=f"{location}/data/bids",
-    #     hdf5_path=f"{location}/data/hdf5/all_bids_large.hdf5",
-    #     exclude_registered=False,
-    #     slice_thickness="large"
-    # )
-
-    annotated_bids_to_hdf5(
+    all_bids_to_hdf5(
         bids_location=f"/home/baris/Desktop/xnat/bids",
-        hdf5_path=f"{location}/data/hdf5/new_annotations.hdf5",
+        hdf5_path=f"{location}/data/hdf5/all_data.hdf5",
         exclude_registered=False,
         slice_thickness="large"
     )
+
+    # annotated_bids_to_hdf5(
+    #     bids_location=f"/home/baris/Desktop/xnat/bids",
+    #     hdf5_path=f"{location}/data/hdf5/new_annotations.hdf5",
+    #     exclude_registered=False,
+    #     slice_thickness="large"
+    # )
