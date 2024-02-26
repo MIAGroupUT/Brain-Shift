@@ -34,9 +34,10 @@ def calculate_loss(img, skull, annotations, d_field, v_field, log=False):
     # ---- LOSSES -----
 
     # Regularization items
-    loss_jacobian = jacobian_loss(v_field, voxel_size=(0.434, 0.434, 3.0), seg_mask=hematoma,
+    loss_jacobian = jacobian_loss(v_field, voxel_size=(0.434, 0.434, 1.0), seg_mask=hematoma,
                                   stripped_brain=img)  # TODO: parse the affine for size
-    loss_l1_gradient = spatial_gradient_l1(v_field)
+    # loss_l1_gradient = spatial_gradient_l1(v_field)
+    loss_gradient = gradient_loss(v_field, power=2)
 
     # General items
     loss_hematoma_decrease = volume_loss(hematoma, morphed_hematoma)
@@ -48,13 +49,13 @@ def calculate_loss(img, skull, annotations, d_field, v_field, log=False):
     loss_ventricle_overlap = ventricle_overlap(morphed_left_ventricle, morphed_right_ventricle)
     loss_ventricle_wrong_side = ventricle_wrong_side(morphed_left_ventricle, morphed_right_ventricle)
 
-    big_loss = (10.0 * loss_jacobian +
-                30.0 * loss_l1_gradient +
+    big_loss = (5.0 * loss_jacobian +
+                5.0 * loss_gradient +
                 loss_hematoma_decrease +
-                10.0 * loss_skull +
-                2.0 * loss_ventricle_overlap +
+                5.0 * loss_skull +
+                1.0 * loss_ventricle_overlap +
                 loss_jeffrey +
-                3.0 * loss_ssim +
+                1.0 * loss_ssim +
                 loss_ventricle_wrong_side
 
                 )
@@ -62,7 +63,7 @@ def calculate_loss(img, skull, annotations, d_field, v_field, log=False):
     if log:
         out = {
             "Jacobian": loss_jacobian.item(),
-            "L1 gradient": loss_l1_gradient.item(),
+            "Gradient": loss_gradient.item(),
             "Hematoma decrease": loss_hematoma_decrease.item(),
             "Skull decrease": loss_skull.item(),
             "SSIM": loss_ssim.item(),

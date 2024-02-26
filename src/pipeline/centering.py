@@ -24,7 +24,7 @@ def infer_centered(run_name, location, read_location, hdf5_target, do_annotation
 
     hdf5_file = f'{save_location}/{run_name}.hdf5'
 
-    dataset = HDF5Dataset(f"{location}/data/hdf5/{hdf5_target}", with_annotations=True)
+    dataset = HDF5Dataset(f"{location}/data/hdf5/{hdf5_target}", with_annotations=do_annotations)
     dataloader = DataLoader(dataset, batch_size=1, shuffle=True)
 
     for brain in tqdm(dataloader, position=0):

@@ -171,6 +171,18 @@ def spatial_gradient_l1(deformation_field):
 
     return grad.mean()
 
+def gradient_loss(s, power=1):
+    dy = torch.abs(s[:, :, 5:, :, :] - s[:, :, :-5, :, :])
+    dx = torch.abs(s[:, :, :, 5:, :] - s[:, :, :, :-5, :])
+    dz = torch.abs(s[:, :, :, :, 5:] - s[:, :, :, :, :-5])
+
+    dy **= power
+    dx **= power
+    dz **= power
+
+    d = torch.mean(dx) + torch.mean(dy) + torch.mean(dz)
+    return d / 3.0
+
 
 def compute_jacobian_det(displacement, voxel_spacing=(1, 1, 1)):
     """

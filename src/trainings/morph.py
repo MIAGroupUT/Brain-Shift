@@ -49,13 +49,13 @@ def calculate_loss(img, skull, annotations, d_field, v_field, log=False):
     loss_ventricle_overlap = ventricle_overlap(morphed_left_ventricle, morphed_right_ventricle)
     loss_ventricle_wrong_side = ventricle_wrong_side(morphed_left_ventricle, morphed_right_ventricle)
 
-    big_loss = (10.0 * loss_jacobian +
-                100.0 * loss_l1_gradient +
+    big_loss = (5.0 * loss_jacobian +
+                5.0 * loss_l1_gradient +
                 loss_hematoma_decrease +
-                10.0 * loss_skull +
-                2.0 * loss_ventricle_overlap +
+                5.0 * loss_skull +
+                1.0 * loss_ventricle_overlap +
                 loss_jeffrey +
-                3.0 * loss_ssim + 
+                1.0 * loss_ssim + 
                 loss_ventricle_wrong_side
 
                 )
@@ -129,7 +129,6 @@ def train_morph(run_name, num_epochs, location, data_location, batch_size=1, num
         detailed_morph(img, morphed_image_full, deformation_field, use_wandb=True, cmap_d="coolwarm")
 
 
-        if epoch % 200 == 0:
-            torch.save(model.state_dict(), f"{save_location}/weights/{epoch}.pt")
+        torch.save(model.state_dict(), f"{save_location}/weights/{epoch}.pt")
 
         scheduler.step()

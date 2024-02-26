@@ -141,8 +141,11 @@ def detailed_morph(img, morphed, d_field, slice=None, line=True, name="unnamed",
     slices_deformation = [torch.rot90(d_field[slice_x, :, :]), d_field[:, :, slice_z]]
 
     axs[1, 0].imshow(slices_img[0], cmap=cmap)
+    axs[1, 0].axis('equal')
     axs[1, 1].imshow(slices_morphed[0], cmap=cmap)
+    axs[1, 1].axis('equal')
     axs[1, 2].imshow(slices_deformation[0], cmap=cmap_d)
+    axs[1, 2].axis('equal')
 
     axs[0, 0].imshow(slices_img[1], cmap=cmap)
     axs[0, 1].imshow(slices_morphed[1], cmap=cmap)

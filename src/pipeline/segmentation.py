@@ -27,7 +27,7 @@ def infer_segmentation(location, relative_model_path, run_name, hdf5_location, d
     hdf5_file = f'{out_dir}/{run_name}.hdf5'
 
     # Load the data
-    dataset = HDF5Dataset(hdf5_filename=hdf5_location, with_skulls=False, with_annotations=False)
+    dataset = HDF5Dataset(hdf5_filename=f"{location}/data/hdf5/{hdf5_location}", with_skulls=False, with_annotations=False)
 
     dataloader = DataLoader(dataset, batch_size=1, shuffle=True)
 
