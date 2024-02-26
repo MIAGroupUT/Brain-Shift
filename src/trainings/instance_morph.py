@@ -1,3 +1,4 @@
+import torch.nn.functional
 import wandb
 from src.data_loading.datasets import AllBidsDataset, Dataset3D, HDF5Dataset
 from src.nets.voxelmorph_layers import apply_deformation_field
@@ -18,6 +19,10 @@ def calculate_loss(img, skull, annotations, d_field, v_field, log=False):
     hematoma = one_hot_mask[:, 1].unsqueeze(dim=0).float()
     left_ventricle = one_hot_mask[:, 2].unsqueeze(dim=0).float()
     right_ventricle = one_hot_mask[:, 3].unsqueeze(dim=0).float()
+
+    # Get only head mask
+    head = img > 0.01
+    only_head = torch.nn.functional.relu(head * (-1. * skull))
 
     # Morphed bois
     morphed_img = apply_deformation_field(img, d_field)

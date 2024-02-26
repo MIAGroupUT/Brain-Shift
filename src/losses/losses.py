@@ -45,11 +45,13 @@ def pixel_loss(img, binary=False):
         beta = 100  # This is a hyperparameter you can adjust
         soft_binary_half1 = torch.sigmoid(beta * (half1 - 0.001))
         soft_binary_half2 = torch.sigmoid(beta * (half2 - 0.001))
-        loss = (torch.abs(torch.sum(soft_binary_half1) - torch.sum(soft_binary_half2)) + 1e-8) / (torch.sum(torch.sigmoid(beta * (img - 0.001))) + 1e-8)
+        loss = (torch.abs(torch.sum(soft_binary_half1) - torch.sum(soft_binary_half2)) + 1e-8) / (
+                    torch.sum(torch.sigmoid(beta * (img - 0.001))) + 1e-8)
     else:
         loss = (torch.abs(torch.sum(half1) - torch.sum(half2)) + 1e-8) / torch.sum(img)
 
     return loss
+
 
 def jeffreys_divergence_loss(img, bins=90):
     hist_x = differentiable_histogram(img[:, :, :, :img.shape[3] // 2, :], n_bins=bins)[0]
@@ -171,16 +173,18 @@ def spatial_gradient_l1(deformation_field):
 
     return grad.mean()
 
-def gradient_loss(s, power=1):
-    dy = torch.abs(s[:, :, 5:, :, :] - s[:, :, :-5, :, :])
-    dx = torch.abs(s[:, :, :, 5:, :] - s[:, :, :, :-5, :])
-    dz = torch.abs(s[:, :, :, :, 5:] - s[:, :, :, :, :-5])
+
+def gradient_loss(s, power=1, step=1):
+    dy = torch.abs(s[:, :, step:, :, :] - s[:, :, :-step, :, :])
+    dx = torch.abs(s[:, :, :, step:, :] - s[:, :, :, :-step, :])
+    dz = torch.abs(s[:, :, :, :, step:] - s[:, :, :, :, :-step])
 
     dy **= power
     dx **= power
     dz **= power
 
     d = torch.mean(dx) + torch.mean(dy) + torch.mean(dz)
+
     return d / 3.0
 
 
@@ -225,8 +229,9 @@ def jacobian_loss(v_field, voxel_size, seg_mask, stripped_brain):
 
 
 def ventricle_overlap(ventricle_left, ventricle_right):
-    point = ventricle_left.shape[-2]//2
-    return dice_loss_no_background(ventricle_left[:, :, :, :point, :], torch.flip(ventricle_right[:, :, :, point:, :], [-2]))
+    point = ventricle_left.shape[-2] // 2
+    return dice_loss_no_background(ventricle_left[:, :, :, :point, :],
+                                   torch.flip(ventricle_right[:, :, :, point:, :], [-2]))
 
 
 def distance_based_loss_3D(volume, correct_side):
