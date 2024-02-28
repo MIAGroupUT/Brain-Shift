@@ -47,7 +47,7 @@ if __name__ == '__main__':
     location = "/home/baris/Documents/brain-morphing"
     all_bids_to_hdf5(
         bids_location=f"/home/baris/Desktop/xnat/bids",
-        hdf5_path=f"{location}/data/hdf5/all_data.hdf5",
+        hdf5_path=f"{location}/data/hdf5/all_new_data.hdf5",
         exclude_registered=False,
         slice_thickness="large"
     )

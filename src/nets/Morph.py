@@ -8,7 +8,7 @@ from src.nets.voxelmorph_layers import *
 # Inspired by Voxelmorph, should morph an image in a diffeomorphic way.
 class Morph(nn.Module):
 
-    def __init__(self, in_shape, mode='general', *args, **kwargs):
+    def __init__(self, in_shape, mode='general', slow_start=True,  *args, **kwargs):
         super().__init__(*args, **kwargs)
 
         self.in_shape = in_shape
@@ -43,9 +43,10 @@ class Morph(nn.Module):
         else:
             self.flow_conv = nn.Conv3d(self.n_dim, self.n_dim, kernel_size=3, padding='same')
 
-        # In the voxelmorph repo they start this layer with very small weights.
-        self.flow_conv.weight = nn.Parameter(Normal(0, 1e-5).sample(self.flow_conv.weight.shape))
-        self.flow_conv.bias = nn.Parameter(torch.zeros(self.flow_conv.bias.shape))
+        if slow_start:
+            # In the voxelmorph repo they start this layer with very small weights.
+            self.flow_conv.weight = nn.Parameter(Normal(0, 1e-5).sample(self.flow_conv.weight.shape))
+            self.flow_conv.bias = nn.Parameter(torch.zeros(self.flow_conv.bias.shape))
 
         self.integrate = VecInt(in_shape=in_shape, num_steps=7)
 
