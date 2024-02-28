@@ -10,7 +10,7 @@ def prepare_item(item, final_shape=(512, 512, 128)):
     original_shape = item['ct'].shape[-1]
     ratio = original_shape / final_shape[-1]
 
-    item['affine'][0, 0, 0,  2, 2] = item['affine'][0, 0, 0, 2, 2] * ratio
+    item['affine'][0, 0,  2, 2] = item['affine'][0, 0, 2, 2] * ratio
         
     new_item = {
         'ct': torch.nn.functional.interpolate(item['ct'], final_shape, mode='trilinear')[0],
@@ -36,8 +36,8 @@ def prepare_dataset(hdf5_input, hdf5_target):
 
 if __name__ == '__main__':
     # location = "/home/imreb/brain-morphing"
-    location = "/home/baris/Documents/work/brain-morphing"
-    input_file = f"{location}/data/hdf5/input_for_morph.hdf5"
-    output_file = f"{location}/data/hdf5/ready_to_morph.hdf5"
+    location = "/home/baris/Documents/brain-morphing"
+    input_file = f"{location}/data/hdf5/new_script_input.hdf5"
+    output_file = f"{location}/data/hdf5/ready_to_morph_new.hdf5"
 
     prepare_dataset(input_file, output_file)

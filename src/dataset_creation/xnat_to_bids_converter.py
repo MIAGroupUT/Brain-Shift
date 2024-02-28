@@ -7,6 +7,7 @@ from glob import glob
 from src.dataset_creation.SegmentationImage import SegmentationImage, SegmentationLabelError
 from warnings import warn
 from datetime import datetime
+from tqdm import tqdm
 
 
 def convert(bids_path, xnat_path, annotations_path, meta_path):
@@ -39,7 +40,7 @@ def convert(bids_path, xnat_path, annotations_path, meta_path):
     loader = LoadImaged(keys=["image"], ensure_channel_first=True, image_only=False)
 
     # Extract images and scans meta-data
-    for patient_id, session_id in meta_scans_df.index.values:
+    for patient_id, session_id in tqdm(meta_scans_df.index.values):
         print(patient_id, session_id)
 
         # Read image data
@@ -49,7 +50,7 @@ def convert(bids_path, xnat_path, annotations_path, meta_path):
 
         bids_scans_df = pd.DataFrame()
 
-        for series_name in ["small_series", "large_series", "registered_series"]:
+        for series_name in ["large_series", "registered_series"]:
             series_nb = meta_scans_df.loc[(patient_id, session_id), series_name]
             xnat_series_path = None if pd.isna(series_nb) else path.join(xnat_session_path, str(int(series_nb)),
                                                                          "DICOM")

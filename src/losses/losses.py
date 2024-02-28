@@ -46,7 +46,7 @@ def pixel_loss(img, binary=False):
         soft_binary_half1 = torch.sigmoid(beta * (half1 - 0.001))
         soft_binary_half2 = torch.sigmoid(beta * (half2 - 0.001))
         loss = (torch.abs(torch.sum(soft_binary_half1) - torch.sum(soft_binary_half2)) + 1e-8) / (
-                    torch.sum(torch.sigmoid(beta * (img - 0.001))) + 1e-8)
+                torch.sum(torch.sigmoid(beta * (img - 0.001))) + 1e-8)
     else:
         loss = (torch.abs(torch.sum(half1) - torch.sum(half2)) + 1e-8) / torch.sum(img)
 
@@ -188,6 +188,12 @@ def gradient_loss(s, power=1, step=1):
     return d / 3.0
 
 
+
+
+def ventricle_volume(before, after):
+    return torch.relu((torch.sum(before) - torch.sum(after)) / torch.sum(before))
+
+
 def compute_jacobian_det(displacement, voxel_spacing=(1, 1, 1)):
     """
     Calculate the Jacobian determinant value at each point of the displacement map.
@@ -228,7 +234,16 @@ def jacobian_loss(v_field, voxel_size, seg_mask, stripped_brain):
     return F.relu((-det * (1 - seg_mask)) * brain_mask).mean()
 
 
-def ventricle_overlap(ventricle_left, ventricle_right):
+def ventricle_overlap(ventricle_left, ventricle_right, one_piece=False):
+
+    if one_piece:
+        point = ventricle_left.shape[-2] // 2
+
+        points = torch.clamp((ventricle_left + ventricle_right), min=0.0, max=1.0)
+
+        return dice_loss_no_background(points[:, :, :, :point, :],
+                                       torch.flip(points[:, :, :, point:, :], [-2]))
+
     point = ventricle_left.shape[-2] // 2
     return dice_loss_no_background(ventricle_left[:, :, :, :point, :],
                                    torch.flip(ventricle_right[:, :, :, point:, :], [-2]))
