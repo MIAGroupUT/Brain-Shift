@@ -94,6 +94,9 @@ def dice_binary_loss(img):
 
     return dice_loss_yes_background(half1 != 0, torch.flip(half2 != 0, [3]))
 
+def ventricle_volume(before, after):
+    return torch.relu((torch.sum(before) - torch.sum(after)) / torch.sum(before))
+
 
 def half_half_mse(img, blur_kernel=13):
     width = img.shape[2]
